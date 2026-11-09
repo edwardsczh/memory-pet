@@ -5,6 +5,8 @@ const BLUR_CLOSE_MS = 8000;
 const MAX_CHARS = 500;
 
 interface ChatInputProps {
+  /** Changes whenever the character is clicked again: refocus instead of closing. */
+  focusSignal: number;
   busy: boolean;
   placeholder?: string;
   onSend(text: string): void;
@@ -12,15 +14,20 @@ interface ChatInputProps {
   onOpenLog(): void;
 }
 
-export function ChatInput({ busy, placeholder, onSend, onClose, onOpenLog }: ChatInputProps) {
+export function ChatInput({
+  focusSignal,
+  busy,
+  placeholder,
+  onSend,
+  onClose,
+  onOpenLog,
+}: ChatInputProps) {
   const [text, setText] = useState("");
   const ref = useRef<HTMLInputElement | null>(null);
   const blurTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    ref.current?.focus();
-    return () => window.clearTimeout(blurTimer.current);
-  }, []);
+  useEffect(() => () => window.clearTimeout(blurTimer.current), []);
+  useEffect(() => ref.current?.focus(), [focusSignal]);
 
   const send = () => {
     if (busy || !text.trim()) return;

@@ -8,6 +8,7 @@ import {
   FIRST_BUBBLE_MIN_MS,
   MAX_VISIBLE_BUBBLES,
   remainingMessages,
+  SAFETY_BUBBLE_GAP_MS,
   screenPartial,
   sniffEmotion,
   trimLog,
@@ -198,6 +199,8 @@ describe("ChatSession end to end (fake LLM)", () => {
     expect(calls).toHaveLength(0);
     expect(st.safetyEvent?.type).toBe("crisis");
     expect(st.log.some((t) => t.role === "pet" && t.text.includes("12356"))).toBe(true);
+    const pets = st.log.filter((t) => t.role === "pet").length;
+    expect(st.lastTimings?.totalMs).toBe(FIRST_BUBBLE_MIN_MS + (pets - 1) * SAFETY_BUBBLE_GAP_MS);
     session.dismissSafetyEvent();
     expect(session.getState().safetyEvent).toBeNull();
   });

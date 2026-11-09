@@ -34,6 +34,7 @@ export default function App() {
   const consent = useFirstRunConsent();
   const [showConsent, setShowConsent] = useState(false);
   const [inputOpen, setInputOpen] = useState(false);
+  const [inputFocus, setInputFocus] = useState(0);
   const [panelOpen, setPanelOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [debug, setDebug] = useState<{ skin?: string; emotion?: Emotion; talking: boolean }>({
@@ -58,8 +59,10 @@ export default function App() {
     onClick: () => {
       chat.recordActivity();
       if (!accepted) setShowConsent(true);
-      else if (character) setInputOpen((open) => !open);
-      else if (character === null) chat.openManager();
+      else if (character) {
+        setInputOpen(true);
+        setInputFocus((n) => n + 1);
+      } else if (character === null) chat.openManager();
     },
     onDrag: chat.recordActivity,
   });
@@ -104,6 +107,7 @@ export default function App() {
 
       {inputOpen && character && (
         <ChatInput
+          focusSignal={inputFocus}
           busy={state.busy}
           placeholder={`和${character.name}说点什么…`}
           onSend={chat.send}
@@ -133,7 +137,7 @@ export default function App() {
             chat.setQuiet(next);
           }}
           onHide={() => void hideWindow()}
-          onOpenLog={() => character && setPanelOpen((open) => !open)}
+          onOpenLog={character ? () => setPanelOpen((open) => !open) : undefined}
         />
       </div>
 

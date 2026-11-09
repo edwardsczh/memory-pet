@@ -214,6 +214,8 @@
   bottom: 2px;
   left: 50%;
   display: flex;
+  width: max-content;
+  white-space: nowrap;
   gap: 4px;
   transform: translate(-50%, 4px);
   opacity: 0;
@@ -371,6 +373,7 @@
 
 .stage .mp-consent {
   max-height: calc(100vh - 20px);
+  overflow-x: hidden;
   padding: 18px 16px 14px;
 }
 

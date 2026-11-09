@@ -1,4 +1,4 @@
-import type { DialogueTurn, Emotion, StyleProfile } from "../../core/model";
+import type { DialogueTurn, Emotion, PetReply, StyleProfile } from "../../core/model";
 import { normalizeEmotion, postprocess, typingDelayMs } from "../../core/dialogue";
 import { filterReply } from "../../core/safety";
 
@@ -10,6 +10,8 @@ export const MAX_LOG_TURNS = 200;
 export const HISTORY_TURNS = 24;
 /** The LLM round trip already reads as "typing", so the first bubble only waits this long. */
 export const FIRST_BUBBLE_MIN_MS = 350;
+/** Out-of-character safety replies (crisis help, "I am an AI") are not delayed by fake typing. */
+export const SAFETY_BUBBLE_GAP_MS = 500;
 
 const TALK_MS_PER_CHAR = 110;
 
@@ -23,8 +25,11 @@ export function bubbleDueAt(
   text: string,
   first: boolean,
   style?: StyleProfile,
+  safety?: PetReply["safety"],
 ): number {
-  return prevAt + (first ? FIRST_BUBBLE_MIN_MS : typingDelayMs(text, style));
+  if (first) return prevAt + FIRST_BUBBLE_MIN_MS;
+  if (safety === "crisis" || safety === "ai-identity") return prevAt + SAFETY_BUBBLE_GAP_MS;
+  return prevAt + typingDelayMs(text, style);
 }
 
 /** How long the mouth moves for one bubble. */

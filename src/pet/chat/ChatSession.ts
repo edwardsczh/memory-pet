@@ -295,7 +295,13 @@ export class ChatSession {
       if (this.replyDone) this.finishTurn();
       return;
     }
-    const due = bubbleDueAt(this.lastShownAt, next, this.shownCount === 0, this.backend?.style);
+    const due = bubbleDueAt(
+      this.lastShownAt,
+      next,
+      this.shownCount === 0,
+      this.backend?.style,
+      this.finalReply?.safety,
+    );
     const turn = this.turn;
     this.pumpTimer = setTimeout(
       () => {
