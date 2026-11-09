@@ -1,0 +1,103 @@
+:root {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  font-size: 14px;
+  color: #3d2f66;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pet-avatar {
+  width: 220px;
+  height: 260px;
+  margin-bottom: 8px;
+  cursor: grab;
+  -webkit-user-drag: none;
+}
+
+.pet-avatar:active {
+  cursor: grabbing;
+}
+
+.bubble {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 220px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 4px 14px rgba(61, 47, 102, 0.22);
+  line-height: 1.45;
+  white-space: nowrap;
+  animation: pop 160ms ease-out;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  margin-left: -8px;
+  border: 8px solid transparent;
+  border-bottom: 0;
+  border-top-color: rgba(255, 255, 255, 0.96);
+}
+
+.ai-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #5b4b8a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+
+.debug-chip {
+  position: absolute;
+  bottom: 0;
+  left: 4px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.debug-chip.on {
+  background: rgba(214, 51, 108, 0.85);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
