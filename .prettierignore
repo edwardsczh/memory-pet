@@ -3,4 +3,5 @@ node_modules
 src-tauri/target
 src-tauri/gen
 package-lock.json
+public/avatar/*/source/*.min.json
 fixtures

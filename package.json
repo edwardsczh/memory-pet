@@ -13,6 +13,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "avatars": "node scripts/build-avatars.mjs && prettier --write public/avatar/*/manifest.json",
     "fixtures": "node scripts/gen-format-fixtures.ts && node scripts/gen-demo-chat.ts"
   },
   "dependencies": {
