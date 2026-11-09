@@ -72,6 +72,30 @@
 | -------------------- | ------------------------------------------------------------------ |
 | `src/core/ingest/`   | 聊天记录解析（微信第三方导出、QQ、通用格式）、清洗、脱敏、会话切分 |
 | `src/core/persona/`  | 风格画像统计、人格卡生成、示例库与检索                             |
-| `src/core/dialogue/` | 提示词组装、结构化输出解析、风格后处理                             |
+| `src/core/dialogue/` | 提示词组装、结构化输出解析、风格后处理、对话引擎                   |
+| `src/core/text/`     | 共享文本工具：emoji / 微信表情码识别、脱敏占位检测、容错 JSON 提取 |
 | `src/core/safety/`   | 危机检测、AI 身份如实回答、内容过滤、使用时长提醒                  |
 | `fixtures/`          | 虚构的示例聊天数据（不含任何真实个人信息）                         |
+
+## 风格模仿管线
+
+MVP 不微调模型，而是用“人格卡 + 风格画像 + 检索到的真实对话示例（few-shot）”驱动通用 LLM 模仿 TA。输入是清洗后的 `Session[]`，全部是不依赖 Tauri 的纯 TypeScript。
+
+```
+Session[] ─┬─ buildStyleProfile ──► StyleProfile ──► styleToPrompt（中文风格指令）
+           ├─ extractExemplars ───► Exemplar[] ──► ExemplarIndex（BM25，可序列化）
+           └─ generatePersonaCard ► PersonaCard（LLM 分批提取 + 合并，带证据）
+                                         │
+用户消息 ─► DialogueEngine.reply ────────┘
+   safety.precheck → 检索示例 → 组装提示词 → LLM（JSON）→ parseReply → postprocess → safety.postcheck → PetReply
+```
+
+- **风格画像**（`persona/style.ts`）：只统计 TA 的文本消息。长度、连发条数、句号率、句尾标点与语气词频率、口头禅（字符 2–4-gram，按 TA 相对用户的超额频率排序，去掉被更长短语包含的片段）、emoji 与微信表情码、24 小时活跃分布、对用户的称呼（消息首尾的称呼词）。
+- **示例库**（`persona/exemplars.ts`）：抽取“用户 turn → TA 回复 turn”对，前 1–2 个 turn 放进 `Exemplar.prior`。过滤太短、纯表情、纯媒体和含脱敏占位的对。`splitHoldout` 按会话整体留出评测集，避免同一会话同时出现在两边。
+- **检索**（`persona/retrieval.ts`）：中文单字 + 二元组（bigram）分词，BM25 对用户侧文本打分，乘以时间新近度权重，再用 MMR 去重。`toJSON` 只存示例和参数，加载时重建倒排索引（1 万条约 250ms，单次查询约 3ms）。`DenseRetriever` 接口预留给以后的向量检索，`searchHybrid` 用 RRF 融合两路结果。
+- **人格卡**（`persona/personaCard.ts`）：对话片段按约 6k 字符分批，每条消息用短编号（`m12`）标注；LLM 输出带编号证据的 trait，再分轮合并。证据编号映射回真实 `messageId`，不存在或不在本次发送片段里的编号一律丢弃，没有有效证据的 trait 也丢弃。`estimatePersonaCost` 用同一套分批逻辑预估费用。支持进度回调和 `AbortSignal` 取消（`LlmRequest.signal` 会透传给 LLM 实现）。
+- **提示词**（`dialogue/prompt.ts`）：身份与诚实规则放在最前面且永不裁剪（是 AI 不是本人、被问必须如实回答、不编造共同经历、不承诺现实行动、不冒充 TA 此刻在线）；然后是人格卡、风格指令、few-shot 示例（“用户：… / TA：…”）、近期对话、当前时间、输出格式。超出字符预算时先裁示例和较早的对话。
+- **输出解析**（`dialogue/parse.ts`）：要求 `{"messages": [...], "emotion": "..."}`。`parseReply` 容忍代码块包裹、前后多余文字、尾逗号、单引号/中文引号、未加引号的键、被截断的 JSON，最后退回按行拆分纯文本；非法 emotion 回退为 `neutral`。
+- **后处理**（`dialogue/postprocess.ts`）：TA 不爱用句号就去掉句尾单个“。”；超长消息按标点拆成连发；限制连发条数；`typingDelayMs` 给出模拟打字的延迟。安全层替换过的回复只拆行，不改写。
+- **风格强度** `styleStrength`（0–1）：示例数 `2 + 8×强度`，温度 `0.5 + 0.5×强度`。
+- **安全接口**：`SafetyHooks { precheck, postcheck }` 由 `src/core/safety` 实现并注入，默认 `noopSafety`。
