@@ -102,11 +102,16 @@ export interface Exemplar {
   id: string;
   sessionId: string;
   ts: number;
-  /** User's turn text (bursts joined by "\n"). May include 1–2 preceding turns for context. */
+  /**
+   * User's turn text (bursts joined by "\n"). May include 1–2 preceding turns for context;
+   * `extractExemplars` keeps those in `prior` instead.
+   */
   context: string;
   /** TA's reply burst, one entry per original message. */
   reply: string[];
   tags?: string[];
+  /** Turns before `context`, oldest first, so prompts can show who said what. */
+  prior?: { role: "me" | "ta"; text: string }[];
 }
 
 export interface StyleProfile {
@@ -221,6 +226,8 @@ export interface LlmRequest {
   maxTokens?: number;
   /** Ask the provider for a JSON object response. */
   json?: boolean;
+  /** Cancels the request; implementations should reject with an AbortError. */
+  signal?: AbortSignal;
 }
 
 /**
