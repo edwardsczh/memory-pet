@@ -1,117 +1,184 @@
-import { useEffect, useRef, useState } from "react";
-import { isTauri } from "@tauri-apps/api/core";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { Emotion } from "./core/model";
+import {
+  CrisisCard,
+  FirstRunConsent,
+  hideWindow,
+  showWindow,
+  UsageReminder,
+  useFirstRunConsent,
+} from "./compliance";
 import { Avatar } from "./pet/avatar/Avatar";
-import { DEFAULT_CHARACTER_ID } from "./pet/avatar/characters";
-import { EMOTIONS } from "./pet/avatar/manifest";
+import { CHARACTERS, DEFAULT_CHARACTER_ID } from "./pet/avatar/characters";
+import { ChatBubbles } from "./pet/chat/ChatBubbles";
+import { ChatInput } from "./pet/chat/ChatInput";
+import { ChatPanel } from "./pet/chat/ChatPanel";
+import { PetToolbar } from "./pet/chat/PetToolbar";
+import { useChatSession } from "./pet/chat/useChatSession";
+import { useHover } from "./pet/chat/useHover";
+import { usePetPointer } from "./pet/chat/usePetPointer";
 import { DebugPanel } from "./pet/DebugPanel";
 import { useClickThrough } from "./pet/useClickThrough";
+import "./pet/chat/chat.css";
 import "./App.css";
 
-const DRAG_THRESHOLD_PX = 4;
-const GREETINGS = [
-  "嗨～我在这儿呢",
-  "今天过得怎么样呀",
-  "拖我可以换个位置哦",
-  "我还在学说话，等等我～",
-];
-const TALK_MS_PER_CHAR = 120;
+const ChatDebug = import.meta.env.DEV ? lazy(() => import("./pet/chat/ChatDebug")) : null;
 
-function talkDuration(text: string): number {
-  return Math.min(3000, Math.max(800, text.length * TALK_MS_PER_CHAR));
-}
+const REST_MINUTES = 15;
 
-function randomOtherEmotion(current: Emotion): Emotion {
-  const others = EMOTIONS.filter((e) => e !== current);
-  return others[Math.floor(Math.random() * others.length)];
+function avatarSkin(id: string | undefined): string {
+  return CHARACTERS.some((c) => c.id === id) ? (id as string) : DEFAULT_CHARACTER_ID;
 }
 
 export default function App() {
-  const [pressed, setPressed] = useState(false);
-  const [bubble, setBubble] = useState<string | null>(GREETINGS[0]);
-  const [characterId, setCharacterId] = useState<string>(DEFAULT_CHARACTER_ID);
-  const [emotion, setEmotion] = useState<Emotion>("happy");
-  const [speaking, setSpeaking] = useState(true);
-  const [debugTalking, setDebugTalking] = useState(false);
-  const pressStart = useRef<{ x: number; y: number } | null>(null);
-  const greetingIndex = useRef(0);
-  const hit = useClickThrough(pressed);
+  const consent = useFirstRunConsent();
+  const [showConsent, setShowConsent] = useState(false);
+  const [inputOpen, setInputOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [debug, setDebug] = useState<{ skin?: string; emotion?: Emotion; talking: boolean }>({
+    talking: false,
+  });
+  const restTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(restTimer.current), []);
 
-  useEffect(() => {
-    if (!bubble) return;
-    const timer = window.setTimeout(() => setBubble(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [bubble]);
+  const accepted = consent.status === "accepted";
+  const chat = useChatSession({
+    enabled: accepted,
+    restMs: REST_MINUTES * 60_000,
+    onRest: (ms) => {
+      void hideWindow();
+      window.clearTimeout(restTimer.current);
+      restTimer.current = window.setTimeout(() => void showWindow(), ms);
+    },
+  });
+  const { state, character } = chat;
 
-  useEffect(() => {
-    if (!speaking || !bubble) return;
-    const timer = window.setTimeout(() => setSpeaking(false), talkDuration(bubble));
-    return () => window.clearTimeout(timer);
-  }, [speaking, bubble]);
+  const pointer = usePetPointer({
+    onClick: () => {
+      chat.recordActivity();
+      if (!accepted) setShowConsent(true);
+      else if (character) setInputOpen((open) => !open);
+      else if (character === null) chat.openManager();
+    },
+    onDrag: chat.recordActivity,
+  });
+  const hit = useClickThrough(pointer.pressed);
+  const hovered = useHover(".pet-zone");
 
-  // Distinguish click (new expression + bubble) from drag (move window): dragging only
-  // starts after the pointer has moved a few pixels with the button held.
-  useEffect(() => {
-    if (!pressed) return;
-    const onMove = (e: PointerEvent) => {
-      const start = pressStart.current;
-      if (!start) return;
-      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < DRAG_THRESHOLD_PX) return;
-      pressStart.current = null;
-      setPressed(false);
-      if (isTauri()) void getCurrentWindow().startDragging();
-    };
-    const onUp = () => {
-      if (pressStart.current) {
-        greetingIndex.current = (greetingIndex.current + 1) % GREETINGS.length;
-        setBubble(GREETINGS[greetingIndex.current]);
-        setSpeaking(true);
-        setEmotion(randomOtherEmotion);
-      }
-      pressStart.current = null;
-      setPressed(false);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, [pressed]);
-
-  const onAvatarPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    pressStart.current = { x: e.clientX, y: e.clientY };
-    setPressed(true);
-  };
+  const crisis = state.safetyEvent?.type === "crisis";
+  const skin = debug.skin ?? avatarSkin(character?.avatar);
 
   return (
     <main className="stage">
-      {bubble && (
-        <div className="bubble" data-hit onClick={() => setBubble(null)}>
-          <span className="ai-badge" title="你正在与 AI 互动">
-            AI
-          </span>
-          {bubble}
+      {panelOpen && character ? (
+        <ChatPanel
+          name={character.name}
+          log={state.log}
+          pending={state.pending}
+          typing={state.typing}
+          onClear={() => void chat.clearLog()}
+          onClose={() => setPanelOpen(false)}
+        />
+      ) : (
+        <div className="chat-stack">
+          {consent.status === "required" ? (
+            <div className="chat-bubbles">
+              <div className="chat-bubble is-notice" data-hit onClick={() => setShowConsent(true)}>
+                <span className="chat-text">你好呀～开始聊天前，先看看使用说明吧</span>
+                <button type="button" className="chat-action" data-hit>
+                  查看说明
+                </button>
+              </div>
+            </div>
+          ) : (
+            <ChatBubbles
+              bubbles={state.bubbles}
+              typing={state.typing}
+              onAction={chat.onBubbleAction}
+              onDismiss={chat.dismiss}
+            />
+          )}
         </div>
       )}
-      <Avatar
-        characterId={characterId}
-        emotion={emotion}
-        talking={(speaking && bubble !== null) || debugTalking}
-        onPointerDown={onAvatarPointerDown}
-      />
+
+      {inputOpen && character && (
+        <ChatInput
+          busy={state.busy}
+          placeholder={`和${character.name}说点什么…`}
+          onSend={chat.send}
+          onClose={() => setInputOpen(false)}
+          onOpenLog={() => setPanelOpen((open) => !open)}
+        />
+      )}
+
+      <div
+        className="pet-zone"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          if (character) setPanelOpen((open) => !open);
+        }}
+      >
+        <Avatar
+          characterId={skin}
+          emotion={debug.emotion ?? state.emotion}
+          talking={state.talking || debug.talking}
+          onPointerDown={pointer.onPointerDown}
+        />
+        <PetToolbar
+          visible={hovered && !pointer.pressed}
+          muted={muted}
+          onToggleMute={(next) => {
+            setMuted(next);
+            chat.setQuiet(next);
+          }}
+          onHide={() => void hideWindow()}
+          onOpenLog={() => character && setPanelOpen((open) => !open)}
+        />
+      </div>
+
+      {crisis && (
+        <div className="pet-sheet" data-hit>
+          <CrisisCard onClose={chat.dismissSafetyEvent} />
+        </div>
+      )}
+      {chat.reminder !== null && (
+        <UsageReminder
+          continuousMs={chat.reminder}
+          restMinutes={REST_MINUTES}
+          onRest={() => chat.closeReminder(true)}
+          onContinue={() => chat.closeReminder(false)}
+        />
+      )}
+      {showConsent && consent.status === "required" && (
+        <FirstRunConsent
+          onAccept={(input) => {
+            void consent.accept(input);
+            setShowConsent(false);
+          }}
+        />
+      )}
+
       {import.meta.env.DEV && (
         <>
           <DebugPanel
-            characterId={characterId}
-            emotion={emotion}
-            talking={debugTalking}
-            onCharacter={setCharacterId}
-            onEmotion={setEmotion}
-            onTalking={setDebugTalking}
-          />
+            characterId={skin}
+            emotion={debug.emotion ?? state.emotion}
+            talking={debug.talking}
+            onCharacter={(id) => setDebug((d) => ({ ...d, skin: id }))}
+            onEmotion={(e) => setDebug((d) => ({ ...d, emotion: e }))}
+            onTalking={(t) => setDebug((d) => ({ ...d, talking: t }))}
+          >
+            {ChatDebug && (
+              <Suspense>
+                <ChatDebug
+                  chat={chat}
+                  consent={consent}
+                  onReset={() => setDebug({ talking: false })}
+                />
+              </Suspense>
+            )}
+          </DebugPanel>
           <div className={`debug-chip ${hit ? "on" : ""}`}>{hit ? "捕获鼠标" : "点击穿透"}</div>
         </>
       )}
