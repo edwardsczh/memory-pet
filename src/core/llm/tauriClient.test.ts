@@ -47,8 +47,8 @@ describe("Tauri LLM client", () => {
 
   it("propagates Rust error messages", async () => {
     invoke.mockRejectedValue("API Key 无效或已过期（401）");
-    await expect(
-      createTauriLlmClient().stream!({ messages: [] }, () => {}),
-    ).rejects.toBe("API Key 无效或已过期（401）");
+    await expect(createTauriLlmClient().stream!({ messages: [] }, () => {})).rejects.toBe(
+      "API Key 无效或已过期（401）",
+    );
   });
 });

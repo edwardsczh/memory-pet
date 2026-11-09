@@ -58,7 +58,10 @@ export function createTauriVault(): Vault {
 }
 
 /** Minimal subset of the Web Storage API, so tests can pass a fake. */
-export type KeyValueStorage = Pick<Storage, "getItem" | "setItem" | "removeItem" | "key" | "length">;
+export type KeyValueStorage = Pick<
+  Storage,
+  "getItem" | "setItem" | "removeItem" | "key" | "length"
+>;
 
 /**
  * Unencrypted development store. Values round-trip through JSON like the real
