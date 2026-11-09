@@ -126,6 +126,15 @@
 | `src/compliance/`    | 合规 UI：AI 标识、首次使用说明、时长提醒、求助卡片、快捷控制       |
 | `fixtures/`          | 虚构的示例聊天数据（不含任何真实个人信息）                         |
 
+## 聊天记录导入
+
+入口 `src/core/ingest/index.ts`，两步：
+
+1. `parseImport(fileName, text, { conversation?, tzOffsetMinutes? })` → `ParsedImport`。`detectFormat` 按内容（必要时参考扩展名）识别格式，交给 `adapters/` 下对应的适配器；每个适配器文件头注明了所依据的导出工具版本和源码位置。读文件时先用 `decodeBytes` 处理 UTF-8 / UTF-16 / GB18030。不带时区的时间一律按 UTC+8 解析。
+2. `cleanImport(parsed, { me, ta }, options)` → `{ messages, sessions, report }`：按时间排序去重，过滤系统提示 / 撤回 / 红包转账 / 链接卡片，图片等只留占位，脱敏（`redact.ts`），群聊里其他成员改名「群友A」或丢弃，按 30 分钟空闲切分会话，连发合并成 `Turn`。
+
+`fixtures/formats/` 是每种格式的小样本（`node scripts/gen-format-fixtures.ts` 生成），`fixtures/demo/` 是贯穿 MVP 演示的虚构情侣聊天（`node scripts/gen-demo-chat.ts`，固定随机种子，内容来自 `scripts/demo-script.ts`）。两者都可用 `npm run fixtures` 重新生成。面向用户的导出说明见 [import-guide.md](import-guide.md)。
+
 ## 风格模仿管线
 
 MVP 不微调模型，而是用“人格卡 + 风格画像 + 检索到的真实对话示例（few-shot）”驱动通用 LLM 模仿 TA。输入是清洗后的 `Session[]`，全部是不依赖 Tauri 的纯 TypeScript。

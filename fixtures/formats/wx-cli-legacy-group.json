@@ -1,0 +1,110 @@
+{
+  "chat": "周末桌游群",
+  "username": "10000000001@chatroom",
+  "is_group": true,
+  "chat_type": "group",
+  "count": 11,
+  "messages": [
+    {
+      "timestamp": 1716377400,
+      "time": "2024-05-22 19:30",
+      "sender": "",
+      "content": "[系统] \"大熊\"邀请\"糖糖\"加入了群聊",
+      "type": "系统",
+      "local_id": 100,
+      "type_code": 10000
+    },
+    {
+      "timestamp": 1716377460,
+      "time": "2024-05-22 19:31",
+      "sender": "大熊",
+      "content": "周六谁来玩桌游",
+      "type": "文本",
+      "local_id": 101,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377520,
+      "time": "2024-05-22 19:32",
+      "sender": "糖糖",
+      "content": "我我我",
+      "type": "文本",
+      "local_id": 102,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377580,
+      "time": "2024-05-22 19:33",
+      "sender": "小鹿",
+      "content": "@大熊 带上我和哲哲～",
+      "type": "文本",
+      "local_id": 103,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377640,
+      "time": "2024-05-22 19:34",
+      "sender": "阿哲",
+      "content": "我可以 几点",
+      "type": "文本",
+      "local_id": 104,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377700,
+      "time": "2024-05-22 19:35",
+      "sender": "大熊",
+      "content": "下午两点 老地方",
+      "type": "文本",
+      "local_id": 105,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377760,
+      "time": "2024-05-22 19:36",
+      "sender": "糖糖",
+      "content": "@小鹿 你上次欠我一杯奶茶hhh",
+      "type": "文本",
+      "local_id": 106,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377820,
+      "time": "2024-05-22 19:37",
+      "sender": "小鹿",
+      "content": "记着呢嘛 @糖糖 这次请你",
+      "type": "文本",
+      "local_id": 107,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377880,
+      "time": "2024-05-22 19:38",
+      "sender": "阿哲",
+      "content": "@阿May 你来不来",
+      "type": "文本",
+      "local_id": 108,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716377940,
+      "time": "2024-05-22 19:39",
+      "sender": "大熊",
+      "content": "[链接/文件]",
+      "type": "链接/文件",
+      "local_id": 109,
+      "type_code": 49,
+      "appmsg_type": 2001
+    },
+    {
+      "timestamp": 1716378000,
+      "time": "2024-05-22 19:40",
+      "sender": "小鹿",
+      "content": "谢谢老板～",
+      "type": "文本",
+      "local_id": 110,
+      "type_code": 1
+    }
+  ],
+  "meta": {}
+}

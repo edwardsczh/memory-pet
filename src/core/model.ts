@@ -41,6 +41,7 @@ export type SourceFormat =
   | "wechat-exporter-txt"
   | "wx-cli-json"
   | "wx-cli-markdown"
+  | "wx-cli-txt"
   | "qq-ntqq-json"
   | "qq-txt"
   | "qq-mht"
@@ -57,6 +58,20 @@ export interface ParsedImport {
   participants: { sender: string; count: number }[];
   messages: ChatMessage[];
   warnings: string[];
+  /** Sender the source marks as the exporting account, to prefill `SpeakerMapping.me`. */
+  selfSender?: string;
+  /**
+   * Every conversation found when one export file holds several (chatlog-keeper
+   * writes all chats into one JSON). `messages` covers only the selected one.
+   */
+  conversations?: ConversationSummary[];
+}
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  isGroup: boolean;
+  count: number;
 }
 
 /** User's answer to "which sender is me, which is TA". */
@@ -91,6 +106,12 @@ export interface CleanReport {
   droppedByKind: Partial<Record<MessageKind, number>>;
   redactions: Partial<Record<RedactionKind, number>>;
   sessions: number;
+  /** Non-text messages kept as content-free placeholders such as "[图片]". */
+  keptByKind?: Partial<Record<MessageKind, number>>;
+  /** Exact duplicates removed (same sender, time and text). */
+  duplicates?: number;
+  /** Messages from senders that are neither me nor TA and were dropped. */
+  droppedOthers?: number;
 }
 
 export type RedactionKind = "phone" | "idcard" | "bankcard" | "email" | "address" | "password";
