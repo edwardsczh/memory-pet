@@ -1,6 +1,4 @@
-.mp-ai-badge,
-.mp-card,
-.mp-quick {
+:root {
   --mp-ink: #3d2f66;
   --mp-muted: #7a6f99;
   --mp-accent: #6f5bc9;
@@ -8,6 +6,12 @@
   --mp-line: #e6e0f5;
   --mp-calm: #2f7d7a;
   --mp-calm-soft: #e9f6f4;
+}
+
+.mp-ai-badge,
+.mp-card,
+.mp-quick,
+.mp-btn {
   font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
   color: var(--mp-ink);
 }
@@ -32,7 +36,7 @@
 
 .mp-ai-tooltip {
   position: absolute;
-  left: 50%;
+  left: -4px;
   z-index: 10;
   width: max-content;
   max-width: 220px;
@@ -46,7 +50,7 @@
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
-  transform: translate(-50%, 4px);
+  transform: translateY(4px);
   transition:
     opacity 120ms ease,
     transform 120ms ease;
@@ -64,7 +68,7 @@
 .mp-ai-badge:focus-visible .mp-ai-tooltip,
 .mp-ai-badge.mp-tip-open .mp-ai-tooltip {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 /* ---------- Shared card / buttons ---------- */
@@ -250,7 +254,7 @@
 /* ---------- Usage reminder ---------- */
 
 .mp-reminder {
-  width: min(320px, 100%);
+  width: min(360px, 100%);
   padding: 22px 22px 18px;
   text-align: center;
 }
@@ -368,6 +372,10 @@
 
 .mp-number.copied .mp-number-hint {
   color: var(--mp-calm);
+}
+
+.mp-emergency > span {
+  flex-basis: 100%;
 }
 
 .mp-emergency,

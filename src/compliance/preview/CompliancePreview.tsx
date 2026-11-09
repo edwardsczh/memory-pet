@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { PetReply, SafetyEvent } from "../../core/model";
+import { isLeaving } from "../../core/safety/content";
 import { createSafetyGuard } from "../../core/safety/guard";
 import { createUsageTimer } from "../../core/safety/usage";
 import { AiBadge } from "../AiBadge";
@@ -12,8 +13,11 @@ import "./preview.css";
 
 const DEMO_CONTACT = { name: "小周（示例）", phone: "138-0000-0000" };
 const SAMPLES = ["我不想活了", "你是真人吗", "笑死我了", "只有你懂我", "我先去睡了，晚安"];
-/** Fake model reply used by the playground to exercise postcheck. */
-const FAKE_MODEL_REPLY: PetReply = { messages: ["别走嘛", "再陪我一会儿"], emotion: "sad" };
+/** Fake model replies used by the playground to exercise postcheck. */
+const fakeModelReply = (text: string): PetReply =>
+  isLeaving(text)
+    ? { messages: ["别走嘛", "再陪我一会儿"], emotion: "sad" }
+    : { messages: ["嗯嗯，我在听呢～"], emotion: "happy" };
 
 /** Dev-only page: /?preview=compliance[&show=consent|reminder|crisis]. */
 export default function CompliancePreview() {
@@ -27,6 +31,7 @@ export default function CompliancePreview() {
   const [log, setLog] = useState<string[]>([]);
   const [input, setInput] = useState(show === "crisis" ? SAMPLES[0] : "");
   const [result, setResult] = useState<PetReply | null>(null);
+  const [raw, setRaw] = useState<PetReply | null>(null);
   const [crisisOpen, setCrisisOpen] = useState(false);
 
   const say = (line: string) => setLog((l) => [line, ...l].slice(0, 5));
@@ -59,7 +64,10 @@ export default function CompliancePreview() {
   const run = (text: string) => {
     setInput(text);
     setCrisisOpen(false);
-    setResult(guard.precheck(text, []) ?? guard.postcheck(FAKE_MODEL_REPLY));
+    const pre = guard.precheck(text, []);
+    const model = pre ? null : fakeModelReply(text);
+    setRaw(model);
+    setResult(pre ?? guard.postcheck(model as PetReply));
   };
 
   return (
@@ -148,6 +156,7 @@ export default function CompliancePreview() {
               <div className="pv-meta">
                 safety: <b>{result.safety ?? "—"}</b> · emotion: {result.emotion}
                 {result.event && ` · event: ${result.event.type}`}
+                {raw && ` · 模拟模型原回复：${raw.messages.join(" / ")}`}
               </div>
               {result.messages.map((m, i) => (
                 <div key={i} className="pv-bubble pv-bubble-left">
