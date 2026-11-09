@@ -1,0 +1,555 @@
+{
+  "export_info": {
+    "version": "1",
+    "exported_at": "2026-11-09T10:00:00+08:00",
+    "generator": "wx-cli 0.7.4"
+  },
+  "conversation": {
+    "talker": "wxid_xiaolu_demo",
+    "display_name": "小鹿（wxid_xiaolu_demo）",
+    "type": "private",
+    "message_count": 32,
+    "time_range_start": 1716210180,
+    "time_range_end": 1716247680
+  },
+  "items": [
+    {
+      "sort_seq": 1716210180000,
+      "server_id": 5000000000000,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210180,
+      "content": {
+        "Text": "在干嘛呢"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "在干嘛呢"
+    },
+    {
+      "sort_seq": 1716210240001,
+      "server_id": 5000000000001,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210240,
+      "content": {
+        "Text": "刚洗完澡～"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "刚洗完澡～"
+    },
+    {
+      "sort_seq": 1716210249002,
+      "server_id": 5000000000002,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210249,
+      "content": {
+        "Text": "哲哲今天是什么日子嘛"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "哲哲今天是什么日子嘛"
+    },
+    {
+      "sort_seq": 1716210258003,
+      "server_id": 5000000000003,
+      "msg_type": 47,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210258,
+      "content": {
+        "Emoji": "<msg><emoji md5=\"00000000000000000000000000000000\" /></msg>"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "[emoji <msg><emoji md5=\"00000000000000000000000000000000\" /></msg>]"
+    },
+    {
+      "sort_seq": 1716210300004,
+      "server_id": 5000000000004,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210300,
+      "content": {
+        "Text": "520呀 我记得的"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "520呀 我记得的"
+    },
+    {
+      "sort_seq": 1716210360005,
+      "server_id": 5000000000005,
+      "msg_type": 49,
+      "sub_type": 2001,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210360,
+      "content": {
+        "RedEnvelope": {
+          "title": "恭喜发财，大吉大利",
+          "raw_xml": ""
+        }
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "[红包] 恭喜发财，大吉大利"
+    },
+    {
+      "sort_seq": 1716210369006,
+      "server_id": 5000000000006,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210369,
+      "content": {
+        "Text": "hhh算你有良心"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "hhh算你有良心"
+    },
+    {
+      "sort_seq": 1716210420007,
+      "server_id": 5000000000007,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210420,
+      "content": {
+        "Text": "我也有东西给你"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "我也有东西给你"
+    },
+    {
+      "sort_seq": 1716210429008,
+      "server_id": 5000000000008,
+      "msg_type": 3,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210429,
+      "content": {
+        "Image": {
+          "md5": "00000000000000000000000000000000"
+        }
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "[image 00000000000000000000000000000000]"
+    },
+    {
+      "sort_seq": 1716210480009,
+      "server_id": 5000000000009,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210480,
+      "content": {
+        "Text": "是团子！给你拍的"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "是团子！给你拍的"
+    },
+    {
+      "sort_seq": 1716210489010,
+      "server_id": 5000000000010,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210489,
+      "content": {
+        "Text": "它今天又把我的奶茶打翻了"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "它今天又把我的奶茶打翻了"
+    },
+    {
+      "sort_seq": 1716210540011,
+      "server_id": 5000000000011,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210540,
+      "content": {
+        "Text": "哈哈哈 团子真是个小祖宗"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "哈哈哈 团子真是个小祖宗"
+    },
+    {
+      "sort_seq": 1716210600012,
+      "server_id": 5000000000012,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210600,
+      "content": {
+        "Text": "不许笑嘛"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "不许笑嘛"
+    },
+    {
+      "sort_seq": 1716210609013,
+      "server_id": 5000000000013,
+      "msg_type": 10002,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210609,
+      "content": {
+        "Revoke": "\"小鹿\" 撤回了一条消息"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "[revoke] \"小鹿\" 撤回了一条消息"
+    },
+    {
+      "sort_seq": 1716210660014,
+      "server_id": 5000000000014,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210660,
+      "content": {
+        "Text": "没什么 发错了"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "没什么 发错了"
+    },
+    {
+      "sort_seq": 1716210720015,
+      "server_id": 5000000000015,
+      "msg_type": 34,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210720,
+      "content": "Voice",
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "[voice]"
+    },
+    {
+      "sort_seq": 1716210780016,
+      "server_id": 5000000000016,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210780,
+      "content": {
+        "Text": "听到啦 笨蛋"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "听到啦 笨蛋"
+    },
+    {
+      "sort_seq": 1716210840017,
+      "server_id": 5000000000017,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210840,
+      "content": {
+        "Text": "对了我换手机号了 新号是 13800138000 你存一下"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "对了我换手机号了 新号是 13800138000 你存一下"
+    },
+    {
+      "sort_seq": 1716210849018,
+      "server_id": 5000000000018,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210849,
+      "content": {
+        "Text": "快递地址也改成 青岛市市南区示例路1号 吧"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "快递地址也改成 青岛市市南区示例路1号 吧"
+    },
+    {
+      "sort_seq": 1716210900019,
+      "server_id": 5000000000019,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210900,
+      "content": {
+        "Text": "好 我邮箱 azhe.demo@example.com 你也记一下"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "好 我邮箱 azhe.demo@example.com 你也记一下"
+    },
+    {
+      "sort_seq": 1716210960020,
+      "server_id": 5000000000020,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716210960,
+      "content": {
+        "Text": "门禁密码是 2580 别忘了"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "门禁密码是 2580 别忘了"
+    },
+    {
+      "sort_seq": 1716211020021,
+      "server_id": 5000000000021,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211020,
+      "content": {
+        "Text": "我的卡号 4111 1111 1111 1111 你帮我填一下"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "我的卡号 4111 1111 1111 1111 你帮我填一下"
+    },
+    {
+      "sort_seq": 1716211080022,
+      "server_id": 5000000000022,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211080,
+      "content": {
+        "Text": "身份证号也发我 11010519491231002X 是这个吧"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "身份证号也发我 11010519491231002X 是这个吧"
+    },
+    {
+      "sort_seq": 1716211140023,
+      "server_id": 5000000000023,
+      "msg_type": 49,
+      "sub_type": 5,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211140,
+      "content": {
+        "Link": {
+          "sub_type": 5,
+          "title": "猫咪生病的十个信号",
+          "des": null,
+          "url": "https://example.com/a",
+          "raw_xml": ""
+        }
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "[链接] 猫咪生病的十个信号"
+    },
+    {
+      "sort_seq": 1716211200024,
+      "server_id": 5000000000024,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211200,
+      "content": {
+        "Text": "这个你看看～"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "这个你看看～"
+    },
+    {
+      "sort_seq": 1716211260025,
+      "server_id": 5000000000025,
+      "msg_type": 49,
+      "sub_type": 6,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211260,
+      "content": {
+        "File": {
+          "title": "团子疫苗记录.pdf",
+          "file_ext": "pdf",
+          "file_size": 20480,
+          "md5": null,
+          "raw_xml": ""
+        }
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "[文件] 团子疫苗记录.pdf"
+    },
+    {
+      "sort_seq": 1716211320026,
+      "server_id": 5000000000026,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211320,
+      "content": {
+        "Text": "晚安鹿鹿"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "晚安鹿鹿"
+    },
+    {
+      "sort_seq": 1716211329027,
+      "server_id": 5000000000027,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211329,
+      "content": {
+        "Text": "晚安哲哲～"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "晚安哲哲～"
+    },
+    {
+      "sort_seq": 1716211338028,
+      "server_id": 5000000000028,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716211338,
+      "content": {
+        "Text": "梦里见"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "梦里见"
+    },
+    {
+      "sort_seq": 1716247380029,
+      "server_id": 5000000000029,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716247380,
+      "content": {
+        "Text": "早呀～"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "早呀～"
+    },
+    {
+      "sort_seq": 1716247440030,
+      "server_id": 5000000000030,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_xiaolu_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716247440,
+      "content": {
+        "Text": "今天要去图书馆嘛"
+      },
+      "status": 2,
+      "sender_display_name": "小鹿（wxid_xiaolu_demo）",
+      "direction": "incoming",
+      "snippet": "今天要去图书馆嘛"
+    },
+    {
+      "sort_seq": 1716247680031,
+      "server_id": 5000000000031,
+      "msg_type": 1,
+      "sub_type": 0,
+      "sender": "wxid_azhe_demo",
+      "talker": "wxid_xiaolu_demo",
+      "create_time": 1716247680,
+      "content": {
+        "Text": "早 我在地铁上"
+      },
+      "status": 2,
+      "sender_display_name": "阿哲（wxid_azhe_demo）",
+      "direction": "outgoing",
+      "snippet": "早 我在地铁上"
+    }
+  ],
+  "paging": {
+    "limit": 0,
+    "offset": 0,
+    "returned": 32,
+    "has_more": false,
+    "total": 32
+  },
+  "stats": {
+    "scanned": 32,
+    "skipped": 0
+  }
+}

@@ -1,0 +1,258 @@
+[
+  {
+    "content" : "在干嘛呢",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:03:00",
+    "timestamp" : 1716210180,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "刚洗完澡～",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:04:00",
+    "timestamp" : 1716210240,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "哲哲今天是什么日子嘛",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:04:09",
+    "timestamp" : 1716210249,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg><emoji fromusername=\"\" tousername=\"\" type=\"2\" md5=\"00000000000000000000000000000000\" \/><\/msg>",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:04:18",
+    "timestamp" : 1716210258,
+    "type" : 47,
+    "typeName" : "表情"
+  },
+  {
+    "content" : "520呀 我记得的",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:05:00",
+    "timestamp" : 1716210300,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg>\n  <appmsg appid=\"\" sdkver=\"0\">\n    <title>微信红包<\/title>\n    <type>2001<\/type>\n  <\/appmsg>\n<\/msg>",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:06:00",
+    "timestamp" : 1716210360,
+    "type" : 49,
+    "typeName" : "链接\/文件\/小程序"
+  },
+  {
+    "content" : "hhh算你有良心",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:06:09",
+    "timestamp" : 1716210369,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "我也有东西给你",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:07:00",
+    "timestamp" : 1716210420,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg><img aeskey=\"0\" encryver=\"1\" length=\"102400\" md5=\"00000000000000000000000000000000\" \/><\/msg>",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:07:09",
+    "timestamp" : 1716210429,
+    "type" : 3,
+    "typeName" : "图片"
+  },
+  {
+    "content" : "是团子！给你拍的",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:08:00",
+    "timestamp" : 1716210480,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "它今天又把我的奶茶打翻了",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:08:09",
+    "timestamp" : 1716210489,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "哈哈哈 团子真是个小祖宗",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:09:00",
+    "timestamp" : 1716210540,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "不许笑嘛",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:10:00",
+    "timestamp" : 1716210600,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<sysmsg type=\"revokemsg\"><revokemsg><content>\"小鹿\" 撤回了一条消息<\/content><\/revokemsg><\/sysmsg>",
+    "sender" : "系统",
+    "time" : "2024-05-20 21:10:09",
+    "timestamp" : 1716210609,
+    "type" : 10002,
+    "typeName" : "撤回消息"
+  },
+  {
+    "content" : "没什么 发错了",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:11:00",
+    "timestamp" : 1716210660,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg><voicemsg endflag=\"1\" length=\"4096\" voicelength=\"3000\" \/><\/msg>",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:12:00",
+    "timestamp" : 1716210720,
+    "type" : 34,
+    "typeName" : "语音"
+  },
+  {
+    "content" : "听到啦 笨蛋",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:13:00",
+    "timestamp" : 1716210780,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "对了我换手机号了 新号是 13800138000 你存一下",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:14:00",
+    "timestamp" : 1716210840,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "快递地址也改成 青岛市市南区示例路1号 吧",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:14:09",
+    "timestamp" : 1716210849,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "好 我邮箱 azhe.demo@example.com 你也记一下",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:15:00",
+    "timestamp" : 1716210900,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "门禁密码是 2580 别忘了",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:16:00",
+    "timestamp" : 1716210960,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "我的卡号 4111 1111 1111 1111 你帮我填一下",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:17:00",
+    "timestamp" : 1716211020,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "身份证号也发我 11010519491231002X 是这个吧",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:18:00",
+    "timestamp" : 1716211080,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg>\n  <appmsg appid=\"\" sdkver=\"0\">\n    <title>猫咪生病的十个信号<\/title>\n    <type>5<\/type>\n    <url>https:\/\/example.com\/article<\/url>\n  <\/appmsg>\n<\/msg>",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:19:00",
+    "timestamp" : 1716211140,
+    "type" : 49,
+    "typeName" : "链接\/文件\/小程序"
+  },
+  {
+    "content" : "这个你看看～",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:20:00",
+    "timestamp" : 1716211200,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "<msg>\n  <appmsg appid=\"\" sdkver=\"0\">\n    <title>团子疫苗记录.pdf<\/title>\n    <type>6<\/type>\n    <appattach><totallen>20480<\/totallen><\/appattach>\n  <\/appmsg>\n<\/msg>",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:21:00",
+    "timestamp" : 1716211260,
+    "type" : 49,
+    "typeName" : "链接\/文件\/小程序"
+  },
+  {
+    "content" : "晚安鹿鹿",
+    "sender" : "阿哲",
+    "time" : "2024-05-20 21:22:00",
+    "timestamp" : 1716211320,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "晚安哲哲～",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:22:09",
+    "timestamp" : 1716211329,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "梦里见",
+    "sender" : "小鹿",
+    "time" : "2024-05-20 21:22:18",
+    "timestamp" : 1716211338,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "早呀～",
+    "sender" : "小鹿",
+    "time" : "2024-05-21 07:23:00",
+    "timestamp" : 1716247380,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "今天要去图书馆嘛",
+    "sender" : "小鹿",
+    "time" : "2024-05-21 07:24:00",
+    "timestamp" : 1716247440,
+    "type" : 1,
+    "typeName" : "文本"
+  },
+  {
+    "content" : "早 我在地铁上",
+    "sender" : "阿哲",
+    "time" : "2024-05-21 07:28:00",
+    "timestamp" : 1716247680,
+    "type" : 1,
+    "typeName" : "文本"
+  }
+]

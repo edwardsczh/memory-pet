@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "fixtures": "node scripts/gen-format-fixtures.ts && node scripts/gen-demo-chat.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

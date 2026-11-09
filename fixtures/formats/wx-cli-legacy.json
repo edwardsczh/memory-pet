@@ -1,0 +1,301 @@
+{
+  "chat": "小鹿",
+  "username": "wxid_xiaolu_demo",
+  "is_group": false,
+  "chat_type": "private",
+  "count": 32,
+  "messages": [
+    {
+      "timestamp": 1716210180,
+      "time": "2024-05-20 21:03",
+      "sender": "阿哲",
+      "content": "在干嘛呢",
+      "type": "文本",
+      "local_id": 100,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210240,
+      "time": "2024-05-20 21:04",
+      "sender": "",
+      "content": "刚洗完澡～",
+      "type": "文本",
+      "local_id": 101,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210249,
+      "time": "2024-05-20 21:04",
+      "sender": "",
+      "content": "哲哲今天是什么日子嘛",
+      "type": "文本",
+      "local_id": 102,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210258,
+      "time": "2024-05-20 21:04",
+      "sender": "",
+      "content": "[表情]",
+      "type": "表情",
+      "local_id": 103,
+      "type_code": 47
+    },
+    {
+      "timestamp": 1716210300,
+      "time": "2024-05-20 21:05",
+      "sender": "阿哲",
+      "content": "520呀 我记得的",
+      "type": "文本",
+      "local_id": 104,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210360,
+      "time": "2024-05-20 21:06",
+      "sender": "阿哲",
+      "content": "[链接/文件]",
+      "type": "链接/文件",
+      "local_id": 105,
+      "type_code": 49,
+      "appmsg_type": 2001
+    },
+    {
+      "timestamp": 1716210369,
+      "time": "2024-05-20 21:06",
+      "sender": "",
+      "content": "hhh算你有良心",
+      "type": "文本",
+      "local_id": 106,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210420,
+      "time": "2024-05-20 21:07",
+      "sender": "",
+      "content": "我也有东西给你",
+      "type": "文本",
+      "local_id": 107,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210429,
+      "time": "2024-05-20 21:07",
+      "sender": "",
+      "content": "[图片] local_id=108",
+      "type": "图片",
+      "local_id": 108,
+      "type_code": 3
+    },
+    {
+      "timestamp": 1716210480,
+      "time": "2024-05-20 21:08",
+      "sender": "",
+      "content": "是团子！给你拍的",
+      "type": "文本",
+      "local_id": 109,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210489,
+      "time": "2024-05-20 21:08",
+      "sender": "",
+      "content": "它今天又把我的奶茶打翻了",
+      "type": "文本",
+      "local_id": 110,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210540,
+      "time": "2024-05-20 21:09",
+      "sender": "阿哲",
+      "content": "哈哈哈 团子真是个小祖宗",
+      "type": "文本",
+      "local_id": 111,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210600,
+      "time": "2024-05-20 21:10",
+      "sender": "",
+      "content": "不许笑嘛",
+      "type": "文本",
+      "local_id": 112,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210609,
+      "time": "2024-05-20 21:10",
+      "sender": "",
+      "content": "[撤回] \"小鹿\" 撤回了一条消息",
+      "type": "撤回",
+      "local_id": 113,
+      "type_code": 10002
+    },
+    {
+      "timestamp": 1716210660,
+      "time": "2024-05-20 21:11",
+      "sender": "",
+      "content": "没什么 发错了",
+      "type": "文本",
+      "local_id": 114,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210720,
+      "time": "2024-05-20 21:12",
+      "sender": "阿哲",
+      "content": "[语音]",
+      "type": "语音",
+      "local_id": 115,
+      "type_code": 34
+    },
+    {
+      "timestamp": 1716210780,
+      "time": "2024-05-20 21:13",
+      "sender": "",
+      "content": "听到啦 笨蛋",
+      "type": "文本",
+      "local_id": 116,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210840,
+      "time": "2024-05-20 21:14",
+      "sender": "",
+      "content": "对了我换手机号了 新号是 13800138000 你存一下",
+      "type": "文本",
+      "local_id": 117,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210849,
+      "time": "2024-05-20 21:14",
+      "sender": "",
+      "content": "快递地址也改成 青岛市市南区示例路1号 吧",
+      "type": "文本",
+      "local_id": 118,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210900,
+      "time": "2024-05-20 21:15",
+      "sender": "阿哲",
+      "content": "好 我邮箱 azhe.demo@example.com 你也记一下",
+      "type": "文本",
+      "local_id": 119,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716210960,
+      "time": "2024-05-20 21:16",
+      "sender": "",
+      "content": "门禁密码是 2580 别忘了",
+      "type": "文本",
+      "local_id": 120,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211020,
+      "time": "2024-05-20 21:17",
+      "sender": "阿哲",
+      "content": "我的卡号 4111 1111 1111 1111 你帮我填一下",
+      "type": "文本",
+      "local_id": 121,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211080,
+      "time": "2024-05-20 21:18",
+      "sender": "",
+      "content": "身份证号也发我 11010519491231002X 是这个吧",
+      "type": "文本",
+      "local_id": 122,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211140,
+      "time": "2024-05-20 21:19",
+      "sender": "",
+      "content": "[链接] 猫咪生病的十个信号",
+      "type": "链接/文件",
+      "local_id": 123,
+      "type_code": 49,
+      "appmsg_type": 5
+    },
+    {
+      "timestamp": 1716211200,
+      "time": "2024-05-20 21:20",
+      "sender": "",
+      "content": "这个你看看～",
+      "type": "文本",
+      "local_id": 124,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211260,
+      "time": "2024-05-20 21:21",
+      "sender": "阿哲",
+      "content": "[文件] 团子疫苗记录.pdf",
+      "type": "链接/文件",
+      "local_id": 125,
+      "type_code": 49,
+      "appmsg_type": 6
+    },
+    {
+      "timestamp": 1716211320,
+      "time": "2024-05-20 21:22",
+      "sender": "阿哲",
+      "content": "晚安鹿鹿",
+      "type": "文本",
+      "local_id": 126,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211329,
+      "time": "2024-05-20 21:22",
+      "sender": "",
+      "content": "晚安哲哲～",
+      "type": "文本",
+      "local_id": 127,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716211338,
+      "time": "2024-05-20 21:22",
+      "sender": "",
+      "content": "梦里见",
+      "type": "文本",
+      "local_id": 128,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716247380,
+      "time": "2024-05-21 07:23",
+      "sender": "",
+      "content": "早呀～",
+      "type": "文本",
+      "local_id": 129,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716247440,
+      "time": "2024-05-21 07:24",
+      "sender": "",
+      "content": "今天要去图书馆嘛",
+      "type": "文本",
+      "local_id": 130,
+      "type_code": 1
+    },
+    {
+      "timestamp": 1716247680,
+      "time": "2024-05-21 07:28",
+      "sender": "阿哲",
+      "content": "早 我在地铁上",
+      "type": "文本",
+      "local_id": 131,
+      "type_code": 1
+    }
+  ],
+  "meta": {}
+}
