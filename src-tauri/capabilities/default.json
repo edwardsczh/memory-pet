@@ -3,5 +3,19 @@
   "identifier": "default",
   "description": "Capability for the pet window",
   "windows": ["pet"],
-  "permissions": ["core:default", "core:window:allow-start-dragging"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "allow-set-cursor-hit",
+    "allow-open-settings-window",
+    "allow-vault-put",
+    "allow-vault-get",
+    "allow-vault-delete",
+    "allow-vault-list",
+    "allow-vault-wipe",
+    "allow-vault-status",
+    "allow-llm-get-settings",
+    "allow-llm-complete",
+    "allow-llm-stream"
+  ]
 }

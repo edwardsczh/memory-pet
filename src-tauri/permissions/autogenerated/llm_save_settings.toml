@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-llm-save-settings"
+description = "Enables the llm_save_settings command without any pre-configured scope."
+commands.allow = ["llm_save_settings"]
+
+[[permission]]
+identifier = "deny-llm-save-settings"
+description = "Denies the llm_save_settings command without any pre-configured scope."
+commands.deny = ["llm_save_settings"]

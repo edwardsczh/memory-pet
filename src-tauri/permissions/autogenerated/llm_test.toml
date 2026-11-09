@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-llm-test"
+description = "Enables the llm_test command without any pre-configured scope."
+commands.allow = ["llm_test"]
+
+[[permission]]
+identifier = "deny-llm-test"
+description = "Denies the llm_test command without any pre-configured scope."
+commands.deny = ["llm_test"]

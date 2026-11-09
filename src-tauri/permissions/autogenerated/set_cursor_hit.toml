@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-cursor-hit"
+description = "Enables the set_cursor_hit command without any pre-configured scope."
+commands.allow = ["set_cursor_hit"]
+
+[[permission]]
+identifier = "deny-set-cursor-hit"
+description = "Denies the set_cursor_hit command without any pre-configured scope."
+commands.deny = ["set_cursor_hit"]
