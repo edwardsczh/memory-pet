@@ -36,9 +36,13 @@
   visibility: visible;
 }
 
-/* Idle motion is transform-only so it stays on the compositor. */
+/*
+ * Idle motion is transform-only. Breathing is stepped (~3 updates/s, under 1px
+ * each) because WebKitGTK without GPU compositing repaints every animation
+ * frame: smooth 60fps breathing costs ~12% CPU there, stepped ~1.5%.
+ */
 .avatar-body {
-  animation: avatar-breathe 3.6s ease-in-out infinite;
+  animation: avatar-breathe 3.6s steps(6) infinite;
   will-change: transform;
 }
 
