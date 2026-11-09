@@ -1,0 +1,157 @@
+.avatar {
+  position: relative;
+  flex: none;
+  visibility: hidden;
+}
+
+.avatar.is-ready {
+  visibility: visible;
+}
+
+.avatar-motion,
+.avatar-body,
+.avatar-face,
+.avatar-fx,
+.avatar-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-body img {
+  -webkit-user-drag: none;
+}
+
+/* Blink / talk frames replace the resting eyes / mouth only when the expression has them. */
+.avatar-blink,
+.avatar-talk,
+.is-blinking .has-blink .avatar-eyes,
+.mouth-open .has-talk .avatar-mouth {
+  visibility: hidden;
+}
+
+.is-blinking .has-blink .avatar-blink,
+.mouth-open .has-talk .avatar-talk {
+  visibility: visible;
+}
+
+/* Idle motion is transform-only so it stays on the compositor. */
+.avatar-body {
+  animation: avatar-breathe 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.idle-off .avatar-body {
+  animation: none;
+}
+
+.avatar-face:not([hidden]) {
+  animation: avatar-fade-in 140ms ease-out;
+}
+
+.avatar-fx:not([hidden]) {
+  animation: avatar-fx-in 260ms ease-out;
+}
+
+.avatar-pop {
+  animation: avatar-pop 300ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+.avatar-fidget-tilt {
+  animation: avatar-tilt 1600ms ease-in-out;
+}
+
+.avatar-fidget-sway {
+  animation: avatar-sway 1800ms ease-in-out;
+}
+
+.avatar-fidget-hop {
+  animation: avatar-hop 650ms ease-out;
+}
+
+@keyframes avatar-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.008, 1.016);
+  }
+}
+
+@keyframes avatar-fade-in {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes avatar-fx-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes avatar-pop {
+  0% {
+    transform: scale(0.97, 1.03);
+  }
+  45% {
+    transform: scale(1.03, 0.97);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes avatar-tilt {
+  0%,
+  100% {
+    transform: none;
+  }
+  30%,
+  70% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes avatar-sway {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes avatar-hop {
+  0%,
+  100% {
+    transform: none;
+  }
+  35% {
+    transform: translateY(-10px) scale(0.98, 1.02);
+  }
+  65% {
+    transform: translateY(0) scale(1.03, 0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-body,
+  .avatar-motion {
+    animation: none !important;
+  }
+}

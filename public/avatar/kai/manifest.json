@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "id": "kai",
+  "name": "小凯",
+  "size": {
+    "width": 220,
+    "height": 264
+  },
+  "anchor": {
+    "x": 0.5,
+    "y": 1
+  },
+  "layers": {
+    "base": ["layers/base.svg"],
+    "front": ["layers/hair.svg"]
+  },
+  "emotions": {
+    "neutral": {
+      "eyes": "layers/eyes-happy.svg",
+      "brows": "layers/brows-neutral.svg",
+      "mouth": "layers/mouth-smile.svg",
+      "blink": "layers/eyes-humble.svg",
+      "talk": "layers/mouth-talk.svg",
+      "fx": []
+    },
+    "happy": {
+      "eyes": "layers/eyes-bow.svg",
+      "brows": "layers/brows-happy.svg",
+      "mouth": "layers/mouth-laugh.svg",
+      "blink": null,
+      "talk": "layers/mouth-smile.svg",
+      "fx": ["layers/fx-blush.svg", "layers/fx-sparkle.svg"]
+    },
+    "sad": {
+      "eyes": "layers/eyes-lookDown.svg",
+      "brows": "layers/brows-sad.svg",
+      "mouth": "layers/mouth-sad.svg",
+      "blink": "layers/eyes-humble.svg",
+      "talk": "layers/mouth-talk.svg",
+      "fx": ["layers/fx-tear.svg"]
+    },
+    "angry": {
+      "eyes": "layers/eyes-happy.svg",
+      "brows": "layers/brows-angry.svg",
+      "mouth": "layers/mouth-angry.svg",
+      "blink": "layers/eyes-humble.svg",
+      "talk": "layers/mouth-sad.svg",
+      "fx": ["layers/fx-anger.svg"]
+    },
+    "surprised": {
+      "eyes": "layers/eyes-wide.svg",
+      "brows": "layers/brows-raised.svg",
+      "mouth": "layers/mouth-agape.svg",
+      "blink": "layers/eyes-humble.svg",
+      "talk": "layers/mouth-talk.svg",
+      "fx": ["layers/fx-surprise.svg"]
+    },
+    "shy": {
+      "eyes": "layers/eyes-humble.svg",
+      "brows": "layers/brows-sad.svg",
+      "mouth": "layers/mouth-smile.svg",
+      "blink": null,
+      "talk": "layers/mouth-talk.svg",
+      "fx": ["layers/fx-blushStrong.svg", "layers/fx-sweat.svg"]
+    },
+    "thinking": {
+      "eyes": "layers/eyes-lookUp.svg",
+      "brows": "layers/brows-raised.svg",
+      "mouth": "layers/mouth-sad.svg",
+      "blink": "layers/eyes-humble.svg",
+      "talk": "layers/mouth-talk.svg",
+      "fx": ["layers/fx-question.svg"]
+    }
+  },
+  "credits": [
+    {
+      "title": "ToonHead",
+      "author": "Johan Melin",
+      "url": "https://www.figma.com/community/file/1589627891082866389",
+      "via": "https://www.dicebear.com/styles/toon-head/",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Character art adapted from “ToonHead” by Johan Melin (https://www.figma.com/community/file/1589627891082866389), via DiceBear, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Modified: recolored, split into layers, added eye/mouth variants and expression effects."
+    }
+  ]
+}

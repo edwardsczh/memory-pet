@@ -26,7 +26,7 @@
 | 路径                      | 内容                                                                          |
 | ------------------------- | ----------------------------------------------------------------------------- |
 | `src/`                    | 前端代码。`src/pet/` 是桌宠外壳（角色、命中测试、穿透桥接）                   |
-| `public/avatar/`          | 角色美术资源。每个角色一个子目录，当前只有占位图 `placeholder/`               |
+| `public/avatar/`          | 角色美术资源。每个角色一个子目录（`manifest.json` + `layers/` + `source/`）   |
 | `src-tauri/src/`          | Rust 核心。一个模块一个文件：`click_through.rs`、`window_state.rs`、`tray.rs` |
 | `src-tauri/capabilities/` | Tauri 权限声明，前端能调用的窗口 API 都要在这里显式列出                       |
 | `sidecar/`                | Python 推理进程（P3-1 起实现）                                                |
@@ -40,7 +40,7 @@
    - 光标在窗口外：直接设为穿透，并通知前端 `pet://cursor-left`。
    - 光标在窗口内：把窗口内坐标（换算成 CSS 像素）通过 `pet://cursor` 事件发给前端；坐标不变时不重复发送。
 2. **前端命中测试**（`src/pet/hitTest.ts`）：用 `document.elementFromPoint` 找到光标下的元素。
-   - `data-hit="alpha"` 的元素（角色图）：查它的 alpha 蒙版，像素不透明才算命中。蒙版在图片加载后按显示尺寸光栅化一次（`alphaMask.ts`）。
+   - `data-hit="alpha"` 的元素（角色）：查它的 alpha 蒙版，像素不透明才算命中。蒙版按元素布局尺寸光栅化（`alphaMask.ts`），查询时按元素当前包围盒缩放坐标，所以呼吸、弹跳等 CSS 变换不会让蒙版错位。
    - 其他带 `data-hit` 的元素（气泡、按钮等）：整个盒子都算命中。
    - 其余区域：不命中。
 3. **回报**：前端只在命中状态变化时调用 `set_cursor_hit`，Rust 只在状态真正变化时才调用 `set_ignore_cursor_events`。
@@ -54,9 +54,71 @@
 - Linux 依赖 X11 的输入形状（input shape）实现穿透；Wayland 下全局光标位置不可靠，Linux 开发时建议用 X11 会话（或 `GDK_BACKEND=x11`）。
 - 气泡等元素出现或消失时，如果光标静止不动，命中状态要等下一次光标移动才会刷新。
 
+## 角色渲染
+
+代码在 `src/pet/avatar/`，素材在 `public/avatar/<id>/`，素材许可见根目录 `ASSETS_LICENSES.md`。
+
+- **`AvatarRenderer` 接口**（`AvatarRenderer.ts`）：`load(manifestHref)`、`setEmotion(emotion)`、`setTalking(bool)`、`setIdleAnimation(bool)`、`getAlphaMask()`、`dispose()`，并暴露 `element`（挂载根节点）和 `hitElement`（`data-hit="alpha"`、已注册到命中测试）。setter 可以在加载完成前调用，加载后自动应用最新状态。以后接 Live2D / Spine 只需实现同一接口。
+- **`SpriteAvatarRenderer`**（立绘差分）：加载时为所有图层各建一个 `<img>` 并等 `decode()` 完成；之后切换表情、眨眼、张嘴都只是切换可见性，不重新加载、不在 JS 里重绘。
+- **React 组件**：`<Avatar characterId emotion talking idle onPointerDown />`（`Avatar.tsx`）。内置角色列表在 `characters.ts`，默认 `momo`。
+
+### manifest
+
+`public/avatar/<id>/manifest.json`，由 `manifest.ts` 的 `parseManifest` 校验（图层路径必须是角色目录内的相对路径）。所有图层共用一张画布、尺寸相同，按 `base → mouth → eyes → brows → front → fx` 的顺序直接叠放：
+
+```jsonc
+{
+  "version": 1,
+  "id": "momo",
+  "name": "桃桃",
+  "size": { "width": 220, "height": 264 }, // 显示尺寸（CSS px）
+  "anchor": { "x": 0.5, "y": 1 }, // 呼吸、弹跳的变换原点
+  "layers": { "base": ["layers/base.svg"], "front": ["layers/hair.svg"] },
+  "emotions": {
+    "neutral": {
+      "eyes": "layers/eyes-happy.svg",
+      "brows": "layers/brows-neutral.svg",
+      "mouth": "layers/mouth-smile.svg",
+      "blink": "layers/eyes-humble.svg", // null = 本身就是闭眼，不眨眼
+      "talk": "layers/mouth-talk.svg", // 说话时与 mouth 交替
+      "fx": [], // 腮红、泪滴、问号等叠加层
+    },
+  },
+  "credits": [
+    {
+      "title": "…",
+      "author": "…",
+      "url": "…",
+      "license": "…",
+      "licenseUrl": "…",
+      "attribution": "…",
+    },
+  ],
+}
+```
+
+`neutral` 必填，其他表情缺失时回退到 `neutral`（`resolveEmotion`）。内置角色由 `npm run avatars`（`scripts/build-avatars.mjs`）从 `source/` 下的原始素材生成，改表情组合或配色改脚本后重新生成即可。
+
+### 动画与性能
+
+- 呼吸：`.avatar-body` 上的无限 CSS 动画，只改 `transform`，交给合成器处理。
+- 眨眼：`setTimeout` 随机 2–6 秒一次，每次 130ms，20% 概率连眨两下。
+- 说话：90–190ms 随机间隔在闭嘴 / 张嘴帧之间切换。
+- 表情切换：新表情淡入 + 一次小弹跳；特效层上浮淡入。
+- 小动作：20 秒没有交互（点击、切表情、说话）后随机歪头 / 摇摆 / 小跳，之后每 15–30 秒一次。
+- 窗口不可见（`visibilitychange`）或 `setIdleAnimation(false)` 时停止全部待机动画和计时器；系统开启“减少动态效果”时不播放呼吸和弹跳。
+
+### 命中测试
+
+蒙版按表情生成并缓存：取该表情静止帧（身体 + 五官 + 前发 + 特效）合成后提取 alpha，切换表情时重新注册到 `hitElement`。眨眼、张嘴帧都在脸部范围内，不改变轮廓，沿用同一蒙版。呼吸和弹跳是缩放 / 平移，命中测试按包围盒缩放后仍然精确；歪头 / 摇摆是小角度旋转，持续不到 2 秒，期间边缘有几像素误差。
+
+### 调试
+
+开发模式（`import.meta.env.DEV`）左上角有“调试”按钮，展开后可切换角色、表情和说话状态。点击角色会随机换一个表情并“说”一句问候。
+
 ## 拖动与位置记忆
 
-- 在角色上按下并移动超过 4px 才调用 `startDragging()` 开始拖动；没有移动就松开算作点击（切换气泡）。
+- 在角色上按下并移动超过 4px 才调用 `startDragging()` 开始拖动；没有移动就松开算作点击（切换气泡和表情）。
 - 窗口 `Moved` 事件只记录最新位置，由轮询线程在位置稳定 500ms 后写入 `<app_config_dir>/window-state.json`；退出时再立即写一次。
 - 启动时先定位再显示窗口（配置里 `visible: false`），避免闪烁。如果保存的位置不在任何已连接的显示器上（例如拔掉了副屏），回退到主显示器右下角。
 

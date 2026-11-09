@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "avatars": "node scripts/build-avatars.mjs && prettier --write public/avatar/*/manifest.json"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

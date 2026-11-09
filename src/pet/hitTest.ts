@@ -22,6 +22,12 @@ export function isHit(x: number, y: number): boolean {
 
   const mask = alphaTargets.get(el);
   if (!mask) return false;
+  // The bounding box includes CSS transforms (breathing, bounces), so scaling
+  // into mask space keeps the mask aligned with what is on screen.
   const rect = el.getBoundingClientRect();
-  return mask.isOpaque(x - rect.left, y - rect.top);
+  if (rect.width === 0 || rect.height === 0) return false;
+  return mask.isOpaque(
+    ((x - rect.left) * mask.width) / rect.width,
+    ((y - rect.top) * mask.height) / rect.height,
+  );
 }
