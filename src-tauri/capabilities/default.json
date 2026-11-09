@@ -6,6 +6,17 @@
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
+    "allow-set-cursor-hit",
+    "allow-open-settings-window",
+    "allow-vault-put",
+    "allow-vault-get",
+    "allow-vault-delete",
+    "allow-vault-list",
+    "allow-vault-wipe",
+    "allow-vault-status",
+    "allow-llm-get-settings",
+    "allow-llm-complete",
+    "allow-llm-stream",
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-close"

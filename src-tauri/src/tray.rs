@@ -3,19 +3,28 @@ use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, Runtime};
 
 use crate::click_through::PET_WINDOW;
+use crate::settings_window;
 use crate::window_state::{self, PositionSaver};
 
 const MENU_TOGGLE: &str = "toggle";
 const MENU_RESET: &str = "reset-position";
+const MENU_SETTINGS: &str = "settings";
 const MENU_QUIT: &str = "quit";
 
 pub fn create<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let toggle = MenuItem::with_id(app, MENU_TOGGLE, "显示 / 隐藏桌宠", true, None::<&str>)?;
     let reset = MenuItem::with_id(app, MENU_RESET, "重置位置", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, MENU_SETTINGS, "设置…", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, MENU_QUIT, "退出", true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
-        &[&toggle, &reset, &PredefinedMenuItem::separator(app)?, &quit],
+        &[
+            &toggle,
+            &reset,
+            &settings,
+            &PredefinedMenuItem::separator(app)?,
+            &quit,
+        ],
     )?;
 
     let mut builder = TrayIconBuilder::with_id("main")
@@ -28,6 +37,9 @@ pub fn create<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
                 if let Some(window) = app.get_webview_window(PET_WINDOW) {
                     window_state::reset(&window);
                 }
+            }
+            MENU_SETTINGS => {
+                let _ = settings_window::open(app);
             }
             MENU_QUIT => {
                 app.state::<PositionSaver>().flush_now(app);

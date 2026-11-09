@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-llm-set-key"
+description = "Enables the llm_set_key command without any pre-configured scope."
+commands.allow = ["llm_set_key"]
+
+[[permission]]
+identifier = "deny-llm-set-key"
+description = "Denies the llm_set_key command without any pre-configured scope."
+commands.deny = ["llm_set_key"]

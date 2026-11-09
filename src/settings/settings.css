@@ -1,0 +1,277 @@
+html.settings-view {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  background: #f5f3fa;
+}
+
+html.settings-view body,
+html.settings-view #root {
+  height: auto;
+  overflow: visible;
+  user-select: text;
+}
+
+.settings {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 24px 32px;
+  box-sizing: border-box;
+  color: #2e2547;
+}
+
+.settings-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.settings-header p {
+  margin: 4px 0 16px;
+  color: #7a7090;
+}
+
+.card {
+  margin-bottom: 14px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(46, 37, 71, 0.06),
+    0 4px 16px rgba(46, 37, 71, 0.05);
+}
+
+.card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card.subtle {
+  background: #ece8f6;
+  box-shadow: none;
+  line-height: 1.6;
+}
+
+.card.subtle h2 {
+  margin-bottom: 6px;
+}
+
+.card.subtle p {
+  margin: 0 0 4px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field > span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #5b5174;
+}
+
+.settings input,
+.settings select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d9d3e8;
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+.settings input:focus,
+.settings select:focus {
+  border-color: #7b68c8;
+  box-shadow: 0 0 0 3px rgba(123, 104, 200, 0.18);
+}
+
+.key-saved {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+
+.key-saved .muted {
+  flex: 1;
+}
+
+.muted {
+  color: #8a819e;
+  font-size: 13px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #ece8f6;
+  color: #5b4b8a;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pill.ok {
+  background: #e3f5ea;
+  color: #1f7a45;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.actions.left {
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.btn {
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid #d9d3e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #3d2f66;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    opacity 120ms;
+}
+
+.btn:hover:not(:disabled) {
+  background: #f3f0fa;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn.primary {
+  border-color: transparent;
+  background: #5b4b8a;
+  color: #fff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: #4c3e78;
+}
+
+.btn.ghost {
+  height: 28px;
+  padding: 0 12px;
+  color: #b23a5b;
+  border-color: #f0d3db;
+}
+
+.notice {
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+.notice.ok {
+  color: #1f7a45;
+}
+
+.notice.error {
+  color: #b23a3a;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.result.ok {
+  background: #e9f7ef;
+  color: #1d5e39;
+}
+
+.result.error {
+  background: #fdecec;
+  color: #8f2c2c;
+}
+
+.latency {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(31, 122, 69, 0.12);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.banner.warn {
+  border: 1px solid #f1dca6;
+  background: #fff8e6;
+  color: #7a5a12;
+}
+
+.ai-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: #5b4b8a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: 1px;
+}
+
+.card.dev {
+  border: 1px dashed #c9c0e0;
+}
+
+.dev-output {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f7f5fc;
+  font: inherit;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dev-output.error {
+  background: #fdecec;
+  color: #8f2c2c;
+}

@@ -1,5 +1,8 @@
 mod click_through;
+mod llm;
+mod settings_window;
 mod tray;
+mod vault;
 mod window_state;
 
 use tauri::{Manager, WindowEvent};
@@ -12,8 +15,26 @@ pub fn run() {
     tauri::Builder::default()
         .manage(ClickThrough::default())
         .manage(PositionSaver::default())
-        .invoke_handler(tauri::generate_handler![click_through::set_cursor_hit])
+        .manage(llm::LlmService::new())
+        .invoke_handler(tauri::generate_handler![
+            click_through::set_cursor_hit,
+            settings_window::open_settings_window,
+            vault::vault_put,
+            vault::vault_get,
+            vault::vault_delete,
+            vault::vault_list,
+            vault::vault_wipe,
+            vault::vault_status,
+            llm::llm_get_settings,
+            llm::llm_save_settings,
+            llm::llm_set_key,
+            llm::llm_clear_key,
+            llm::llm_test,
+            llm::llm_complete,
+            llm::llm_stream,
+        ])
         .setup(|app| {
+            vault::init(app.handle())?;
             let window = app
                 .get_webview_window(PET_WINDOW)
                 .expect("pet window is declared in tauri.conf.json");
