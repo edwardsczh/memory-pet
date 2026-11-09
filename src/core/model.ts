@@ -200,6 +200,27 @@ export interface PetReply {
   emotion: Emotion;
   /** Set when the safety layer replaced the in-character reply. */
   safety?: "crisis" | "ai-identity" | "blocked";
+  /** UI-facing safety signal (show crisis card, dependency note, ...). */
+  event?: SafetyEvent;
+}
+
+// ---------- Safety ----------
+
+export type CrisisLevel = "high" | "medium";
+
+export type CrisisCategory = "suicide" | "self-harm" | "harm-others" | "distress";
+
+export type DependencySignal = "late-night" | "daily-overuse" | "exclusive-reliance";
+
+export type SafetyEvent =
+  | { type: "crisis"; level: CrisisLevel; category: CrisisCategory }
+  | { type: "dependency"; signals: DependencySignal[]; advice: string }
+  | { type: "usage-reminder"; continuousMs: number };
+
+/** Person the user asked us to suggest contacting in a crisis. */
+export interface EmergencyContact {
+  name: string;
+  phone?: string;
 }
 
 export interface DialogueTurn {
