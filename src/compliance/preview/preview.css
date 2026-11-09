@@ -1,0 +1,145 @@
+.pv-page {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  padding: 24px 28px 40px;
+  background: linear-gradient(160deg, #f6f3ff 0%, #eef6f5 100%);
+  color: #3d2f66;
+  user-select: text;
+}
+
+.pv-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.pv-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.pv-tag {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #e6e0f5;
+  font-size: 12px;
+}
+
+.pv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.pv-box {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e6e0f5;
+}
+
+.pv-wide {
+  grid-column: span 2;
+}
+
+.pv-box h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #7a6f99;
+}
+
+.pv-bubble-row {
+  padding: 4px 0 40px;
+}
+
+.pv-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 13px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(61, 47, 102, 0.15);
+  line-height: 1.5;
+}
+
+.pv-bubble-left {
+  display: flex;
+  margin-top: 8px;
+  max-width: 560px;
+}
+
+.pv-log {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #7a6f99;
+}
+
+.pv-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.pv-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pv-form {
+  display: flex;
+  gap: 8px;
+}
+
+.pv-form input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e6e0f5;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.pv-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.pv-chip {
+  padding: 3px 10px;
+  border: 1px solid #e6e0f5;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  color: #3d2f66;
+  cursor: pointer;
+}
+
+.pv-result {
+  margin-top: 12px;
+}
+
+.pv-meta {
+  font-size: 12px;
+  color: #7a6f99;
+}
+
+.pv-dependency {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff8e8;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .pv-wide {
+    grid-column: auto;
+  }
+}

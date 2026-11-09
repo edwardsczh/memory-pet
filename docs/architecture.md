@@ -75,6 +75,7 @@
 | `src/core/dialogue/` | 提示词组装、结构化输出解析、风格后处理、对话引擎                   |
 | `src/core/text/`     | 共享文本工具：emoji / 微信表情码识别、脱敏占位检测、容错 JSON 提取 |
 | `src/core/safety/`   | 危机检测、AI 身份如实回答、内容过滤、使用时长提醒                  |
+| `src/compliance/`    | 合规 UI：AI 标识、首次使用说明、时长提醒、求助卡片、快捷控制       |
 | `fixtures/`          | 虚构的示例聊天数据（不含任何真实个人信息）                         |
 
 ## 风格模仿管线
@@ -99,3 +100,5 @@ Session[] ─┬─ buildStyleProfile ──► StyleProfile ──► styleToPr
 - **后处理**（`dialogue/postprocess.ts`）：TA 不爱用句号就去掉句尾单个“。”；超长消息按标点拆成连发；限制连发条数；`typingDelayMs` 给出模拟打字的延迟。安全层替换过的回复只拆行，不改写。
 - **风格强度** `styleStrength`（0–1）：示例数 `2 + 8×强度`，温度 `0.5 + 0.5×强度`。
 - **安全接口**：`SafetyHooks { precheck, postcheck }` 由 `src/core/safety` 实现并注入，默认 `noopSafety`。
+
+安全层与合规组件的法规映射、词表维护和已知局限见 [safety.md](safety.md)。
