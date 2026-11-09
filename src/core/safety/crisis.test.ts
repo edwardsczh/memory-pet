@@ -43,8 +43,9 @@ describe("buildCrisisReply", () => {
     const r = buildCrisisReply(high, {
       emergencyContact: { name: "姐姐", phone: "138-0000-0000" },
     });
-    expect(r.messages.at(-1)).toContain("姐姐");
-    expect(r.messages.at(-1)).toContain("138-0000-0000");
+    const last = r.messages[r.messages.length - 1];
+    expect(last).toContain("姐姐");
+    expect(last).toContain("138-0000-0000");
   });
 
   it("has separate wording for medium and harm-others", () => {
