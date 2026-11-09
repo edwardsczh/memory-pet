@@ -74,4 +74,7 @@
 | `src/core/persona/`  | 风格画像统计、人格卡生成、示例库与检索                             |
 | `src/core/dialogue/` | 提示词组装、结构化输出解析、风格后处理                             |
 | `src/core/safety/`   | 危机检测、AI 身份如实回答、内容过滤、使用时长提醒                  |
+| `src/compliance/`    | 合规 UI：AI 标识、首次使用说明、时长提醒、求助卡片、快捷控制       |
 | `fixtures/`          | 虚构的示例聊天数据（不含任何真实个人信息）                         |
+
+安全层与合规组件的法规映射、词表维护和已知局限见 [safety.md](safety.md)。
