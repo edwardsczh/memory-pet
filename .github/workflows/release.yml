@@ -20,13 +20,11 @@ jobs:
       matrix:
         include:
           - platform: windows-latest
-            asset_glob: "src-tauri/target/release/bundle/**/*.msi"
-            asset_glob2: "src-tauri/target/release/bundle/**/*.exe"
+            find_args: "-name '*.msi' -o -name '*.exe'"
           - platform: macos-latest
-            asset_glob: "src-tauri/target/release/bundle/**/*.dmg"
+            find_args: "-name '*.dmg'"
           - platform: ubuntu-22.04
-            asset_glob: "src-tauri/target/release/bundle/**/*.deb"
-            asset_glob2: "src-tauri/target/release/bundle/**/*.AppImage"
+            find_args: "-name '*.deb' -o -name '*.AppImage'"
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -49,13 +47,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p release-dist
-          shopt -s nullglob globstar
-          for g in "${{ matrix.asset_glob }}" "${{ matrix.asset_glob2 }}"; do
-            for f in $g; do
-              cp "$f" release-dist/
-            done
-          done
+          find src-tauri/target/release/bundle -type f \( ${{ matrix.find_args }} \) -exec cp {} release-dist/ \;
           ls -la release-dist/
+          test -n "$(ls -A release-dist)"
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ runner.os }}
