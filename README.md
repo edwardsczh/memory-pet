@@ -1,101 +1,78 @@
 # 记忆桌宠 Memory Pet
 
-把 TA 说话的样子留在你的桌面上：一个常驻桌面、基于真实聊天记录学会对方语气的桌宠。
+把 TA 说话的样子留在你的桌面上：常驻桌宠、基于真实聊天记录学会对方语气，用文字和你聊天。
 
-> 当前进度：**P0 地基阶段**。已完成项目骨架和桌宠窗口（透明、无边框、置顶、可拖动、按像素点击穿透、位置记忆、托盘菜单）、两个可切换的立绘差分角色（7 种表情 + 眨眼 + 说话）、加密本地存储、LLM 服务商接入和设置窗口（托盘 → 设置…）。聊天、导入、记忆等功能尚未实现。
+> 当前版本：**MVP 文字聊天**（v0.1.0）。含透明穿透桌宠、聊天气泡、角色管理（导入 / 授权 / 报告 / 人格卡）、加密本地存储、LLM 设置、合规与安全层。语音与长期记忆为后续迭代。
+
+## 安装（GitHub Release）
+
+在 [Releases](https://github.com/edwardsczh/memory-pet/releases) 下载对应系统的安装包（**未签名**：Windows `.msi` / `.exe`，macOS `.dmg`，Linux `.deb` / `.AppImage`）。
+
+### Windows
+
+1. 下载 `.msi` 或 `.exe` 并运行安装。
+2. 若 SmartScreen 提示「未知发布者」：点 **更多信息** → **仍要运行**（本仓库 CI 产出尚未做代码签名）。
+3. 首次使用需已安装 [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)（Win10/11 通常已带）。
+
+### macOS
+
+1. 打开 `.dmg`，将「Memory Pet」拖入应用程序文件夹。
+2. 若 Gatekeeper 拦截：**系统设置 → 隐私与安全性** → 允许打开，或右键应用 → **打开** 确认一次。
+3. 本发行版**未公证（notarized）**，仅建议内测自用。
+
+### Linux
+
+- 推荐 `.deb`（Debian/Ubuntu）：`sudo dpkg -i memory-pet_*.deb`，缺依赖时 `sudo apt -f install`。
+- 或运行 `.AppImage`：`chmod +x Memory_Pet_*.AppImage && ./Memory_Pet_*.AppImage`。
+- 需要合成器（compositor）才能正确显示透明窗口；托盘需 AppIndicator 支持。
+
+## 首次使用
+
+1. 启动后托盘有图标；桌宠在屏幕一角，**透明区域点击可穿透到下层软件**。
+2. 首次聊天前阅读并同意 **AI 使用说明**（全程 AI 标识、时长提醒等）。
+3. **托盘 → 设置…**：选择 OpenAI 兼容服务商（如 DeepSeek），填写 **API Key** 并测试连接。Key 存系统凭据库，不落明文。
+4. **托盘 → 角色管理…**（或桌宠提示「去创建」）：
+   - 完成 **数据主体声明**（本人 / 在世他人 / 已故亲人）。
+   - **导入聊天记录**：使用第三方导出文件（见下），选择「我是谁 / TA 是谁」。
+   - 查看 **聊天报告**，可编辑人格卡后保存。
+5. 回到桌宠即可打字聊天；开发模式可在管理窗口 **载入演示角色（小鹿）** 快速体验。
+
+### 导出微信聊天记录（第三方工具）
+
+本产品**不**内置微信解密，只解析导出文件。常用工具（任选其一，操作细节见 [docs/import-guide.md](docs/import-guide.md)）：
+
+| 工具 | 说明 |
+|------|------|
+| [chatlog-keeper](https://github.com/labazhou2024/chatlog-keeper) | 微信 / QQ JSON 等 |
+| [WeChatExporter](https://github.com/93857536-pixel/WeChatExporter) | JSON / TXT |
+| [wx-cli](https://github.com/jackwener/wx-cli) | JSON / Markdown |
+
+导出后通过「角色管理 → 导入」选择文件即可。
+
+### 无 API Key 时
+
+可配合本仓库 `scripts/mock-llm-server.mjs` 在本地起一个 OpenAI 兼容 mock（`node scripts/mock-llm-server.mjs`），设置里把 Base URL 设为 `http://127.0.0.1:8787/v1`，模型随意填写 `mock`。
 
 ## 技术栈
 
-- 桌面框架：[Tauri 2](https://v2.tauri.app/)（Rust 核心 + 系统 WebView）
-- 前端：React 19 + TypeScript + Vite
-- 推理 sidecar：Python（`sidecar/`，P3 阶段实现，当前只有目录）
-- 平台：Windows 优先，兼顾 macOS；Linux 可用于开发调试
-
-架构与关键机制见 [docs/architecture.md](docs/architecture.md)。
+- [Tauri 2](https://v2.tauri.app/) + React 19 + TypeScript + Vite
+- 架构说明：[docs/architecture.md](docs/architecture.md)
 
 ## 本地开发
 
-### 1. 安装依赖
+- Node.js **22+**，Rust **stable（≥1.90，Cargo edition 2024）**
+- `npm install` → `npm run tauri dev`
+- 浏览器预览：`npm run dev` 后访问 `http://localhost:1420/?view=settings` 或 `?view=manager`（无穿透与原生 vault 加密行为，逻辑与内存 vault 一致）
 
-所有平台都需要：
-
-- [Node.js](https://nodejs.org/) 22 或更高版本
-- [Rust](https://rustup.rs/) stable（1.90 或更高版本）
-
-各平台额外需要（详见 [Tauri 官方前置条件](https://v2.tauri.app/start/prerequisites/)）：
-
-- **Windows**：Microsoft C++ 生成工具（安装时勾选“使用 C++ 的桌面开发”）和 WebView2 运行时（Windows 10/11 一般已自带）。
-- **macOS**：Xcode Command Line Tools：`xcode-select --install`。
-- **Linux（Debian/Ubuntu）**：
-
-  ```bash
-  sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
-    libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-  ```
-
-### 2. 安装前端依赖
-
-```bash
-npm install
-```
-
-### 3. 启动开发模式
-
-```bash
-npm run tauri dev
-```
-
-首次启动会编译 Rust 依赖，需要几分钟。启动后桌宠出现在主显示器右下角：
-
-- 在角色身上**点击**：弹出气泡并随机换一个表情；**按住拖动**：移动位置（重启后保留）。
-- 角色以外的透明区域：点击直接落到下层窗口。
-- 系统托盘图标菜单：显示 / 隐藏桌宠、重置位置、退出。
-- 开发模式下，窗口左下角有一个小标签显示当前是“点击穿透”还是“捕获鼠标”，方便调试。
-
-> Linux 上需要开启窗口合成（compositor），否则透明区域会显示为黑色；托盘图标需要桌面环境支持 StatusNotifier / AppIndicator。
-
-### 4. 打包
-
-```bash
-npm run tauri build
-```
-
-安装包输出到 `src-tauri/target/release/bundle/`（Windows 为 `.msi` / `.exe`，macOS 为 `.dmg`）。
-
-## 常用命令
-
-| 命令                                                       | 作用                                               |
-| ---------------------------------------------------------- | -------------------------------------------------- |
-| `npm run tauri dev`                                        | 开发模式运行桌面应用                               |
-| `npm run tauri build`                                      | 打包安装包                                         |
-| `npm run dev`                                              | 只启动前端（浏览器里调样式，无窗口穿透等原生能力） |
-| `npm run build`                                            | 类型检查 + 构建前端                                |
-| `npm run lint`                                             | ESLint                                             |
-| `npm run format` / `npm run format:check`                  | Prettier 格式化 / 检查                             |
-| `cd src-tauri && cargo fmt && cargo clippy -- -D warnings` | Rust 格式化与静态检查                              |
-
-## 目录结构
-
-```
-.
-├── src/                 # React 前端
-│   └── pet/             # 桌宠外壳：角色、alpha 命中测试、穿透桥接
-├── public/avatar/       # 角色美术资源（许可见 ASSETS_LICENSES.md）
-├── src-tauri/           # Tauri / Rust 核心
-│   └── src/             # click_through.rs、window_state.rs、tray.rs
-├── sidecar/             # Python 推理 sidecar（预留）
-├── docs/                # 架构文档
-└── .github/workflows/   # CI
-```
-
-## CI
-
-GitHub Actions（`.github/workflows/ci.yml`）在每个 PR 和 `main` 分支上运行：
-
-- 前端：ESLint、Prettier 检查、TypeScript 类型检查和 Vite 构建。
-- Rust：`cargo fmt --check`、`cargo clippy -D warnings`、`cargo check`。
-- 打包：在 Windows、macOS、Linux 上执行 `tauri build`，安装包作为构建产物（artifact）上传。
+常用命令见原 CI 表：`npm test`、`npm run lint`、`npm run tauri build`。
 
 ## 隐私原则
 
-聊天记录、声音和记忆默认只存在本机；调用云端大模型时只发送当前请求必需的上下文，并使用用户自己的 API Key。
+聊天记录、人格与记忆默认**仅本机** AES 加密存储；调用云端模型时只发送当前对话所需上下文，并使用**用户自备 API Key**。
+
+## 已知限制（v0.1.0）
+
+- 安装包**无** Windows 代码签名 / macOS 公证。
+- 人格卡默认由统计 fallback 生成；可选 LLM 生成需已配置 Key。
+- 语音克隆、长期记忆、主动问候完整版仍在路线图 P2/P3。
+- 危机干预热线：**12356**（全国心理援助热线）。
