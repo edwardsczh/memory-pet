@@ -52,3 +52,4 @@ export const clearLlmKey = () => invoke<void>("llm_clear_key");
 export const testLlm = () => invoke<LlmTestResult>("llm_test");
 
 export const openSettingsWindow = () => invoke<void>("open_settings_window");
+export const openManagerWindow = () => invoke<void>("open_manager_window");

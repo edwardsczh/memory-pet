@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { invoke, isTauri } from "@tauri-apps/api/core";
+import { isTauri } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import type { Character, LlmClient } from "../../core/model";
 import { createUsageTimer, type UsageTimer } from "../../core/safety";
 import {
   createTauriLlmClient,
   getLlmSettings,
+  openManagerWindow,
   openSettingsWindow,
 } from "../../core/llm/tauriClient";
 import { CHARACTERS_CHANGED_EVENT, createCharacterRepo } from "../../core/storage/characters";
@@ -141,7 +142,7 @@ export function useChatSession({ enabled, restMs = 15 * 60_000, onRest }: UseCha
   }, [enabled, reloadKey, session, usage]);
 
   const openManager = useCallback(() => {
-    invoke("open_manager_window").catch(() =>
+    openManagerWindow().catch(() =>
       session.notify(
         import.meta.env.DEV
           ? "主面板还没准备好，可以先用左上角“调试 → 载入示例角色”"

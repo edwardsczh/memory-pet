@@ -1,5 +1,6 @@
 mod click_through;
 mod llm;
+mod manager_window;
 mod settings_window;
 mod tray;
 mod vault;
@@ -19,6 +20,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             click_through::set_cursor_hit,
             settings_window::open_settings_window,
+            manager_window::open_manager_window,
             vault::vault_put,
             vault::vault_get,
             vault::vault_delete,
