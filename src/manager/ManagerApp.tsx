@@ -12,9 +12,24 @@ import { createTauriLlmClient } from "../core/llm/tauriClient";
 import { CHARACTERS } from "../pet/avatar/characters";
 import { createCharacterRepo, type CharacterRepo } from "../core/storage/characters";
 import { getVault } from "../core/storage/vault";
+import {
+  buildConsentExport,
+  consentExportFilename,
+  serializeConsentExport,
+} from "../core/export/consentExport";
 import { buildCharacterRecord } from "./buildCharacter";
 import { notifyCharactersChanged } from "./notify";
 import "./manager.css";
+
+function downloadTextFile(filename: string, content: string) {
+  const blob = new Blob([content], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 type Step = "home" | "consent" | "import" | "report" | "persona";
 
@@ -171,6 +186,16 @@ export default function ManagerApp() {
     void reload();
   };
 
+  const exportConsent = async (id: string) => {
+    const c = await repo.get(id);
+    if (!c) {
+      setError("找不到该角色");
+      return;
+    }
+    const doc = buildConsentExport(c);
+    downloadTextFile(consentExportFilename(c, doc.exportedAt), serializeConsentExport(doc));
+  };
+
   const loadDemo = async () => {
     setBusy(true);
     try {
@@ -230,6 +255,13 @@ export default function ManagerApp() {
                         使用
                       </button>
                     ) : null}
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => void exportConsent(c.id)}
+                    >
+                      导出授权记录
+                    </button>
                     <button
                       type="button"
                       className="secondary"
