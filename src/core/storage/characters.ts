@@ -1,4 +1,5 @@
 import type { Character, CleanReport, DialogueTurn, Exemplar, Session } from "../model";
+import { PROACTIVE_GREET_VAULT_KEY } from "../schedule/proactive";
 import type { Vault } from "./vault";
 
 /**
@@ -52,6 +53,13 @@ export function createCharacterRepo(vault: Vault) {
       return (await vault.get<{ id: string }>(APP, "active"))?.id ?? null;
     },
     setActiveId: (id: string) => vault.put(APP, "active", { id }),
+    async getLastProactiveGreet(): Promise<number | null> {
+      const row = await vault.get<{ at: number }>(APP, PROACTIVE_GREET_VAULT_KEY);
+      return row?.at ?? null;
+    },
+    setLastProactiveGreet(at: number) {
+      return vault.put(APP, PROACTIVE_GREET_VAULT_KEY, { at });
+    },
     getAsset<K extends CharacterAssetKey>(id: string, key: K): Promise<CharacterAssets[K] | null> {
       return vault.get<CharacterAssets[K]>(assetNs(id), key);
     },
