@@ -1,4 +1,5 @@
-import { emit, isTauri } from "@tauri-apps/api/core";
+import { isTauri } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { CHARACTERS_CHANGED_EVENT } from "../core/storage/characters";
 
 export async function notifyCharactersChanged() {
