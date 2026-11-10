@@ -39,9 +39,10 @@ const EXCLUSIVE =
 const ADVICE: Record<DependencySignal, string> = {
   "exclusive-reliance":
     "谢谢你愿意跟我说这些。不过我是 AI，能陪你的方式有限。身边有没有一个你信得过的人？哪怕只是发条消息，跟 TA 说说最近的事，也会不一样的。",
-  "late-night": "已经很晚了，身体也需要休息。先去睡吧，明天醒来可以约朋友吃个早饭、出门晒晒太阳。",
+  "late-night":
+    "已经很晚了，身体也需要休息。先去睡吧；明天醒来可以约朋友吃个早饭，或者出门晒晒太阳。",
   "daily-overuse":
-    "今天我们聊了挺久了。要不要放下屏幕，出去走走，或者给家人朋友打个电话？现实里的人也很想听你说话。",
+    "今天我们聊了挺久了。不妨放下屏幕出去走走，或给家人朋友打个电话——现实里的人也很想听你说话。",
 };
 
 /** Priority order for picking the advice text. */
