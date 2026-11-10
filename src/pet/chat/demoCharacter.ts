@@ -1,6 +1,11 @@
 import type { Character } from "../../core/model";
 import { cleanImport, parseImport } from "../../core/ingest";
-import { buildStyleProfile, ExemplarIndex, extractExemplars } from "../../core/persona";
+import {
+  buildStyleProfile,
+  ExemplarIndex,
+  extractExemplars,
+  splitHoldout,
+} from "../../core/persona";
 import type { CharacterRepo } from "../../core/storage/characters";
 
 export const DEMO_CHARACTER_ID = "demo-xiaolu";
@@ -15,7 +20,9 @@ export async function installDemoCharacter(repo: CharacterRepo, now = Date.now()
   const parsed = parseImport("xiaolu-wechat-exporter.json", raw);
   const { sessions, report } = cleanImport(parsed, { me: ["阿哲"], ta: ["小鹿"] });
   const style = buildStyleProfile(sessions);
-  const index = ExemplarIndex.build(extractExemplars(sessions));
+  const exemplars = extractExemplars(sessions);
+  const split = splitHoldout(exemplars);
+  const index = ExemplarIndex.build(split.train);
 
   const character: Character = {
     id: DEMO_CHARACTER_ID,
@@ -47,7 +54,9 @@ export async function installDemoCharacter(repo: CharacterRepo, now = Date.now()
     archived: false,
   };
   await repo.save(character);
+  await repo.putAsset(DEMO_CHARACTER_ID, "sessions", sessions);
   await repo.putAsset(DEMO_CHARACTER_ID, "index", index.toJSON());
+  await repo.putAsset(DEMO_CHARACTER_ID, "holdout", split.holdout);
   await repo.putAsset(DEMO_CHARACTER_ID, "importReport", report);
   await repo.setActiveId(DEMO_CHARACTER_ID);
   return { character, exemplars: index.size, sessions: sessions.length };

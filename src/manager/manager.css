@@ -76,6 +76,79 @@ html.manager-view {
   font-size: 0.9rem;
 }
 
+.blind-panel {
+  margin-bottom: 1rem;
+}
+
+.blind-stats {
+  font-size: 0.85rem;
+  color: #444;
+  margin: 0.5rem 0;
+}
+
+.blind-ok {
+  color: #2a6b4a;
+  margin: 0.75rem 0 0;
+}
+
+.blind-miss {
+  color: #a33;
+  margin: 0.75rem 0 0;
+}
+
+.blind-context {
+  background: #f8f6f3;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.blind-label {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.blind-prior {
+  list-style: none;
+  padding: 0.5rem 0 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.blind-prior li span {
+  display: inline-block;
+  min-width: 1.5rem;
+  color: #888;
+}
+
+.blind-prompt {
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.blind-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.blind-choice {
+  text-align: left;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 2px solid #e0dcd6;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.blind-choice:hover {
+  border-color: #3d6b5a;
+  background: #f5faf8;
+}
+
 .char-list {
   list-style: none;
   padding: 0;
