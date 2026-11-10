@@ -9,12 +9,12 @@
 │ WebView 前端（React + TypeScript，src/）             │
 │  ├ 桌宠舞台：角色、气泡、命中测试                     │
 │  ├ 设置窗口：模型服务商、API Key、连接测试            │
-│  ├ 桌宠聊天：气泡连发、输入框、聊天记录面板          │
-│  └（后续）导入向导、记忆管理                          │
+│  ├ 角色管理：导入向导、授权、聊天报告、人格卡编辑       │
+│  └ 桌宠聊天：气泡连发、输入框、聊天记录面板          │
 │ Rust 核心（src-tauri/）                              │
 │  ├ 窗口：透明 / 无边框 / 置顶 / 位置记忆              │
 │  ├ 点击穿透：全局光标轮询 + set_ignore_cursor_events  │
-│  ├ 托盘菜单、设置窗口                                │
+│  ├ 托盘菜单、设置窗口、管理窗口                      │
 │  ├ 加密存储（vault）、LLM 调用（OpenAI 兼容）         │
 │  └（后续）sidecar 进程管理                           │
 └───────────────┬─────────────────────────────────────┘
@@ -145,13 +145,18 @@
 
 ## 托盘
 
-托盘菜单：显示 / 隐藏桌宠、重置位置、设置…、退出。桌宠窗口不出现在任务栏（`skipTaskbar`），托盘是唯一的常驻入口。
+托盘菜单：显示 / 隐藏桌宠、重置位置、角色管理…、设置…、退出。桌宠窗口不出现在任务栏（`skipTaskbar`），托盘是主要的常驻入口。
 
 ## 多窗口与权限
 
-- 所有窗口共用一个 Vite 入口（`index.html` → `src/main.tsx`），按窗口 label 选择页面：`pet` 渲染桌宠，`settings` 渲染 `src/settings/SettingsApp.tsx`。纯浏览器预览时用 URL 参数 `?view=settings`。
+- 所有窗口共用一个 Vite 入口（`index.html` → `src/main.tsx`），按窗口 label 选择页面：`pet` 渲染桌宠，`settings` 渲染 `src/settings/SettingsApp.tsx`，`manager` 渲染 `src/manager/ManagerApp.tsx`。纯浏览器预览时用 URL 参数 `?view=settings` 或 `?view=manager`。
 - 设置窗口（label `settings`，520×640，有边框）不在配置文件里声明，由 `settings_window::open` 按需创建；已存在时直接显示并聚焦，关闭即销毁。入口：托盘“设置…”，或前端命令 `open_settings_window`。
-- `build.rs` 通过 `AppManifest::commands` 声明全部应用命令，使每个命令**默认拒绝**；`capabilities/default.json`（pet）和 `capabilities/settings.json`（settings）分别列出各窗口允许的命令。新增命令时三处都要改：`lib.rs` 的 `generate_handler!`、`build.rs` 的 `COMMANDS`、对应窗口的 capability。
+- 管理窗口（label `manager`，640×720）同样按需创建，入口：托盘“角色管理…”、前端 `open_manager_window`、桌宠“去创建”气泡。
+- `build.rs` 通过 `AppManifest::commands` 声明全部应用命令，使每个命令**默认拒绝**；`capabilities/default.json`（pet）、`capabilities/manager.json`（manager）和 `capabilities/settings.json`（settings）分别列出各窗口允许的命令。新增命令时三处都要改：`lib.rs` 的 `generate_handler!`、`build.rs` 的 `COMMANDS`、对应窗口的 capability。
+
+## 角色管理
+
+代码在 `src/manager/`。`buildCharacter.ts` 把 `parseImport → cleanImport → buildStyleProfile → ExemplarIndex` 串成一次导入；默认用人格卡 fallback（不调用 LLM），可选勾选后用 `generatePersonaCard`。角色与 bulky 资产经 `CharacterRepo` 写入 vault，保存后 `emit(CHARACTERS_CHANGED_EVENT)` 通知桌宠重载。授权表单覆盖 P1-5 三种主体分支与成年声明。
 
 ## 加密本地存储（vault）
 

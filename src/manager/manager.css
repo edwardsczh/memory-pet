@@ -1,0 +1,189 @@
+html.manager-view {
+  background: #f4f0ea;
+  color: #1a1a1a;
+}
+
+.manager {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
+  font-family: system-ui, sans-serif;
+}
+
+.manager-header h1 {
+  font-size: 1.35rem;
+  margin: 0 0 0.25rem;
+}
+
+.manager-sub {
+  margin: 0 0 1.25rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.manager-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 8%);
+}
+
+.manager-panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.manager-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.manager-actions button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #3d6b5a;
+  color: #fff;
+  cursor: pointer;
+}
+
+.manager-actions button.secondary {
+  background: #e8e4de;
+  color: #333;
+}
+
+.manager-actions button.danger {
+  background: #c44;
+}
+
+.manager-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.manager-error {
+  color: #b00020;
+  background: #ffe8ec;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+}
+
+.manager-empty,
+.hint {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.char-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.char-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.char-list li.is-active {
+  background: #f0f7f4;
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: 8px;
+}
+
+.char-list .meta {
+  display: block;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.char-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.char-actions button {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.char-actions button.danger {
+  border-color: #c44;
+  color: #c44;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+label input,
+label select,
+label textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+label.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+label.check input {
+  width: auto;
+  margin-top: 0.15rem;
+}
+
+label.file input {
+  display: none;
+}
+
+label.file {
+  border: 2px dashed #bbb;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.mapping {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mapping fieldset {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.report dt {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.report dd {
+  margin: 0.15rem 0 0;
+  color: #444;
+}

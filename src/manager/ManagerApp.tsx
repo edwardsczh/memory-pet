@@ -1,0 +1,556 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type {
+  Character,
+  ConsentRecord,
+  ParsedImport,
+  PersonaCard,
+  SpeakerMapping,
+  SubjectStatus,
+} from "../core/model";
+import { parseImport } from "../core/ingest";
+import { createTauriLlmClient } from "../core/llm/tauriClient";
+import { CHARACTERS } from "../pet/avatar/characters";
+import { createCharacterRepo, type CharacterRepo } from "../core/storage/characters";
+import { getVault } from "../core/storage/vault";
+import { buildCharacterRecord } from "./buildCharacter";
+import { notifyCharactersChanged } from "./notify";
+import "./manager.css";
+
+type Step = "home" | "consent" | "import" | "report" | "persona";
+
+const repo: CharacterRepo = createCharacterRepo(getVault());
+
+function emptyConsent(): ConsentRecord {
+  return {
+    subject: "living",
+    subjectName: "",
+    relation: "",
+    subjectConsented: false,
+    personalUseOnly: true,
+    voiceConsent: false,
+    declaredAt: Date.now(),
+    ageAdult: false,
+  };
+}
+
+function formatTs(ts: number) {
+  return new Date(ts).toLocaleDateString("zh-CN");
+}
+
+export default function ManagerApp() {
+  const [chars, setChars] = useState<Character[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("home");
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [consent, setConsent] = useState<ConsentRecord>(emptyConsent);
+  const [parsed, setParsed] = useState<ParsedImport | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [mapping, setMapping] = useState<SpeakerMapping>({ me: [], ta: [] });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [persona, setPersona] = useState<PersonaCard | null>(null);
+  const [useLlm, setUseLlm] = useState(false);
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    const [list, active] = await Promise.all([repo.list(), repo.getActiveId()]);
+    setChars(list);
+    setActiveId(active);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const [list, active] = await Promise.all([repo.list(), repo.getActiveId()]);
+      if (cancelled) return;
+      setChars(list);
+      setActiveId(active);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const resetWizard = () => {
+    setDraftId(null);
+    setConsent(emptyConsent());
+    setParsed(null);
+    setFileName("");
+    setMapping({ me: [], ta: [] });
+    setPersona(null);
+    setError(null);
+    setUseLlm(false);
+    setStep("consent");
+  };
+
+  const canConsent = useMemo(() => {
+    if (!consent.subjectName.trim() || !consent.relation.trim()) return false;
+    if (!consent.ageAdult) return false;
+    if (!consent.personalUseOnly) return false;
+    if (consent.subject === "living" && !consent.subjectConsented) return false;
+    if (consent.subject === "deceased" && !consent.subjectConsented) return false;
+    return true;
+  }, [consent]);
+
+  const onFile = async (file: File) => {
+    setError(null);
+    try {
+      const text = await file.text();
+      const p = parseImport(file.name, text);
+      setParsed(p);
+      setFileName(file.name);
+      const me = p.selfSender ? [p.selfSender] : [];
+      const ta =
+        p.participants
+          .map((x) => x.sender)
+          .filter((s) => !me.includes(s))
+          .slice(0, 1) ?? [];
+      setMapping({ me, ta });
+      setStep("import");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "无法解析文件");
+    }
+  };
+
+  const runBuild = async () => {
+    if (!parsed || mapping.me.length === 0 || mapping.ta.length === 0) {
+      setError("请选择“我”和 TA 对应的昵称");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const llm = useLlm ? createTauriLlmClient() : undefined;
+      const { character, assets } = await buildCharacterRecord(consent, parsed, mapping, {
+        useLlmPersona: useLlm,
+        llm,
+        avatar: consent.subject === "self" ? "kai" : "momo",
+      });
+      await repo.save(character);
+      await repo.putAsset(character.id, "sessions", assets.sessions);
+      await repo.putAsset(character.id, "index", assets.index.toJSON());
+      await repo.putAsset(character.id, "holdout", assets.holdout.holdout);
+      await repo.putAsset(character.id, "importReport", assets.report);
+      await repo.setActiveId(character.id);
+      setDraftId(character.id);
+      setPersona(character.persona ?? null);
+      await notifyCharactersChanged();
+      void reload();
+      setStep("report");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "构建角色失败");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const savePersona = async () => {
+    if (!draftId || !persona) return;
+    const c = await repo.get(draftId);
+    if (!c) return;
+    const next = { ...c, persona: { ...persona, updatedAt: Date.now() } };
+    await repo.save(next);
+    await notifyCharactersChanged();
+    setStep("home");
+    void reload();
+  };
+
+  const activate = async (id: string) => {
+    await repo.setActiveId(id);
+    await notifyCharactersChanged();
+    void reload();
+  };
+
+  const removeChar = async (id: string) => {
+    if (!window.confirm("确定删除该角色及全部本地聊天数据？")) return;
+    await repo.remove(id);
+    await notifyCharactersChanged();
+    void reload();
+  };
+
+  const loadDemo = async () => {
+    setBusy(true);
+    try {
+      const { installDemoCharacter } = await import("../pet/chat/demoCharacter");
+      await installDemoCharacter(repo);
+      await notifyCharactersChanged();
+      void reload();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="manager">
+      <header className="manager-header">
+        <h1>记忆桌宠 · 角色管理</h1>
+        <p className="manager-sub">导入聊天记录，创建会用 TA 语气说话的角色</p>
+      </header>
+
+      {error ? <p className="manager-error">{error}</p> : null}
+
+      {step === "home" ? (
+        <section className="manager-panel">
+          <div className="manager-actions">
+            <button type="button" onClick={resetWizard}>
+              新建角色
+            </button>
+            {import.meta.env.DEV ? (
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => void loadDemo()}
+                disabled={busy}
+              >
+                载入演示角色（小鹿）
+              </button>
+            ) : null}
+          </div>
+          {loading ? (
+            <p>加载中…</p>
+          ) : chars.length === 0 ? (
+            <p className="manager-empty">还没有角色。点「新建角色」从聊天记录开始。</p>
+          ) : (
+            <ul className="char-list">
+              {chars.map((c) => (
+                <li key={c.id} className={c.id === activeId ? "is-active" : ""}>
+                  <div>
+                    <strong>{c.name}</strong>
+                    <span className="meta">
+                      {c.consent.relation} · {formatTs(c.createdAt)}
+                      {c.id === activeId ? " · 当前使用" : ""}
+                    </span>
+                  </div>
+                  <div className="char-actions">
+                    {c.id !== activeId ? (
+                      <button type="button" onClick={() => void activate(c.id)}>
+                        使用
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={async () => {
+                        const p = await repo.get(c.id);
+                        if (!p?.persona) return;
+                        setDraftId(c.id);
+                        setPersona(p.persona);
+                        setStep("persona");
+                      }}
+                    >
+                      编辑人格卡
+                    </button>
+                    <button type="button" className="danger" onClick={() => void removeChar(c.id)}>
+                      删除
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : null}
+
+      {step === "consent" ? (
+        <section className="manager-panel">
+          <h2>数据主体声明</h2>
+          <label>
+            角色类型
+            <select
+              value={consent.subject}
+              onChange={(e) =>
+                setConsent({
+                  ...consent,
+                  subject: e.target.value as SubjectStatus,
+                })
+              }
+            >
+              <option value="self">我自己（数字分身）</option>
+              <option value="living">在世的人</option>
+              <option value="deceased">已故亲人（个人纪念）</option>
+            </select>
+          </label>
+          <label>
+            TA 的称呼
+            <input
+              value={consent.subjectName}
+              onChange={(e) => setConsent({ ...consent, subjectName: e.target.value })}
+              placeholder="如：小鹿"
+            />
+          </label>
+          <label>
+            与你的关系
+            <input
+              value={consent.relation}
+              onChange={(e) => setConsent({ ...consent, relation: e.target.value })}
+              placeholder="如：女朋友"
+            />
+          </label>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={consent.ageAdult}
+              onChange={(e) => setConsent({ ...consent, ageAdult: e.target.checked })}
+            />
+            我已年满 18 周岁
+          </label>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={consent.personalUseOnly}
+              onChange={(e) => setConsent({ ...consent, personalUseOnly: e.target.checked })}
+            />
+            仅用于个人使用，不对外传播或商用
+          </label>
+          {consent.subject === "living" ? (
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={consent.subjectConsented}
+                onChange={(e) => setConsent({ ...consent, subjectConsented: e.target.checked })}
+              />
+              TA 已知情并同意我使用聊天记录创建 AI 角色（文字）
+            </label>
+          ) : null}
+          {consent.subject === "deceased" ? (
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={consent.subjectConsented}
+                onChange={(e) => setConsent({ ...consent, subjectConsented: e.target.checked })}
+              />
+              我是 TA 的近亲属，仅为个人纪念用途创建角色
+            </label>
+          ) : null}
+          <div className="manager-actions">
+            <button type="button" className="secondary" onClick={() => setStep("home")}>
+              返回
+            </button>
+            <button type="button" disabled={!canConsent} onClick={() => setStep("import")}>
+              下一步：导入聊天
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {step === "import" ? (
+        <section className="manager-panel">
+          <h2>导入聊天记录</h2>
+          <p className="hint">支持微信/QQ 导出 JSON、TXT 等，详见 docs/import-guide.md</p>
+          <label className="file">
+            <input
+              type="file"
+              accept=".json,.txt,.csv,.md,.mht"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void onFile(f);
+              }}
+            />
+            {fileName || "选择文件…"}
+          </label>
+          {parsed ? (
+            <>
+              <p>
+                已识别 {parsed.messages.length} 条消息，{parsed.participants.length} 位发送者
+                {parsed.isGroup ? "（群聊）" : ""}
+              </p>
+              <div className="mapping">
+                <fieldset>
+                  <legend>我是</legend>
+                  {parsed.participants.map((p) => (
+                    <label key={`me-${p.sender}`} className="check">
+                      <input
+                        type="checkbox"
+                        checked={mapping.me.includes(p.sender)}
+                        onChange={(e) => {
+                          setMapping((m) => ({
+                            ...m,
+                            me: e.target.checked
+                              ? [...m.me, p.sender]
+                              : m.me.filter((x) => x !== p.sender),
+                          }));
+                        }}
+                      />
+                      {p.sender}（{p.count}）
+                    </label>
+                  ))}
+                </fieldset>
+                <fieldset>
+                  <legend>TA 是</legend>
+                  {parsed.participants.map((p) => (
+                    <label key={`ta-${p.sender}`} className="check">
+                      <input
+                        type="checkbox"
+                        checked={mapping.ta.includes(p.sender)}
+                        onChange={(e) => {
+                          setMapping((m) => ({
+                            ...m,
+                            ta: e.target.checked
+                              ? [...m.ta, p.sender]
+                              : m.ta.filter((x) => x !== p.sender),
+                          }));
+                        }}
+                      />
+                      {p.sender}（{p.count}）
+                    </label>
+                  ))}
+                </fieldset>
+              </div>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={useLlm}
+                  onChange={(e) => setUseLlm(e.target.checked)}
+                />
+                用已配置的 LLM 生成人格卡（会消耗 API 额度）
+              </label>
+              <label>
+                立绘
+                <select
+                  value={consent.subject === "self" ? "kai" : "momo"}
+                  onChange={() => {}}
+                  disabled
+                >
+                  {CHARACTERS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          ) : null}
+          <div className="manager-actions">
+            <button type="button" className="secondary" onClick={() => setStep("consent")}>
+              上一步
+            </button>
+            <button type="button" disabled={!parsed || busy} onClick={() => void runBuild()}>
+              {busy ? "处理中…" : "生成角色"}
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {step === "report" && draftId ? (
+        <ReportView
+          charId={draftId}
+          onNext={() => setStep("persona")}
+          onHome={() => setStep("home")}
+        />
+      ) : null}
+
+      {step === "persona" && persona ? (
+        <section className="manager-panel">
+          <h2>人格卡</h2>
+          <label>
+            摘要
+            <textarea
+              rows={3}
+              value={persona.summary}
+              onChange={(e) => setPersona({ ...persona, summary: e.target.value })}
+            />
+          </label>
+          <label>
+            对你的称呼（逗号分隔）
+            <input
+              value={persona.addressing.join("，")}
+              onChange={(e) =>
+                setPersona({
+                  ...persona,
+                  addressing: e.target.value
+                    .split(/[,，]/)
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
+          </label>
+          <label>
+            备注
+            <textarea
+              rows={2}
+              value={persona.userNotes}
+              onChange={(e) => setPersona({ ...persona, userNotes: e.target.value })}
+            />
+          </label>
+          <div className="manager-actions">
+            <button type="button" className="secondary" onClick={() => setStep("home")}>
+              跳过
+            </button>
+            <button type="button" onClick={() => void savePersona()}>
+              保存并完成
+            </button>
+          </div>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+function ReportView({
+  charId,
+  onNext,
+  onHome,
+}: {
+  charId: string;
+  onNext: () => void;
+  onHome: () => void;
+}) {
+  const [report, setReport] = useState<Awaited<ReturnType<CharacterRepo["getAsset"]>> | null>(null);
+  const [style, setStyle] = useState<Character["style"] | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const r = await repo.getAsset(charId, "importReport");
+      const c = await repo.get(charId);
+      setReport(r);
+      setStyle(c?.style ?? null);
+    })();
+  }, [charId]);
+
+  const rep = report as import("../core/model").CleanReport | null;
+
+  return (
+    <section className="manager-panel">
+      <h2>你们的聊天报告</h2>
+      {rep && style ? (
+        <dl className="report">
+          <dt>保留消息</dt>
+          <dd>
+            {rep.kept} / {rep.total}（{rep.sessions} 个会话）
+          </dd>
+          <dt>时间跨度</dt>
+          <dd>
+            {formatTs(style.firstTs)} — {formatTs(style.lastTs)}
+          </dd>
+          <dt>TA 平均字数</dt>
+          <dd>
+            {style.avgLength.toFixed(1)}（连发 {style.avgBurst.toFixed(1)} 条/轮）
+          </dd>
+          <dt>高频词</dt>
+          <dd>
+            {style.catchphrases
+              .slice(0, 5)
+              .map((c) => c.phrase)
+              .join(" · ") || "—"}
+          </dd>
+          <dt>称呼你</dt>
+          <dd>{style.nicknamesForMe.join(" · ") || "—"}</dd>
+        </dl>
+      ) : (
+        <p>加载报告…</p>
+      )}
+      <div className="manager-actions">
+        <button type="button" className="secondary" onClick={onHome}>
+          返回列表
+        </button>
+        <button type="button" onClick={onNext}>
+          编辑人格卡
+        </button>
+      </div>
+    </section>
+  );
+}

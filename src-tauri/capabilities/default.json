@@ -8,6 +8,7 @@
     "core:window:allow-start-dragging",
     "allow-set-cursor-hit",
     "allow-open-settings-window",
+    "allow-open-manager-window",
     "allow-vault-put",
     "allow-vault-get",
     "allow-vault-delete",
