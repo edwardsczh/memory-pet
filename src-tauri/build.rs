@@ -2,6 +2,7 @@
 const COMMANDS: &[&str] = &[
     "set_cursor_hit",
     "open_settings_window",
+    "open_manager_window",
     "vault_put",
     "vault_get",
     "vault_delete",

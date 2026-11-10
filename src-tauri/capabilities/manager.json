@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "manager",
+  "description": "Capability for the character management window",
+  "windows": ["manager"],
+  "permissions": [
+    "core:default",
+    "allow-open-manager-window",
+    "allow-vault-put",
+    "allow-vault-get",
+    "allow-vault-delete",
+    "allow-vault-list",
+    "allow-vault-wipe",
+    "allow-vault-status",
+    "allow-llm-get-settings",
+    "allow-llm-complete",
+    "allow-llm-stream"
+  ]
+}
