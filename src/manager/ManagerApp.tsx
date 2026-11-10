@@ -14,6 +14,7 @@ import { createCharacterRepo, type CharacterRepo } from "../core/storage/charact
 import { getVault } from "../core/storage/vault";
 import { buildCharacterRecord } from "./buildCharacter";
 import { notifyCharactersChanged } from "./notify";
+import { BlindEvalSection } from "./BlindEvalSection";
 import "./manager.css";
 
 type Step = "home" | "consent" | "import" | "report" | "persona";
@@ -85,6 +86,11 @@ export default function ManagerApp() {
     setUseLlm(false);
     setStep("consent");
   };
+
+  const activeChar = useMemo(
+    () => (activeId ? (chars.find((c) => c.id === activeId) ?? null) : null),
+    [activeId, chars],
+  );
 
   const canConsent = useMemo(() => {
     if (!consent.subjectName.trim() || !consent.relation.trim()) return false;
@@ -193,65 +199,74 @@ export default function ManagerApp() {
       {error ? <p className="manager-error">{error}</p> : null}
 
       {step === "home" ? (
-        <section className="manager-panel">
-          <div className="manager-actions">
-            <button type="button" onClick={resetWizard}>
-              新建角色
-            </button>
-            {import.meta.env.DEV ? (
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => void loadDemo()}
-                disabled={busy}
-              >
-                载入演示角色（小鹿）
+        <>
+          {activeChar ? (
+            <BlindEvalSection key={activeChar.id} repo={repo} active={activeChar} />
+          ) : null}
+          <section className="manager-panel">
+            <div className="manager-actions">
+              <button type="button" onClick={resetWizard}>
+                新建角色
               </button>
-            ) : null}
-          </div>
-          {loading ? (
-            <p>加载中…</p>
-          ) : chars.length === 0 ? (
-            <p className="manager-empty">还没有角色。点「新建角色」从聊天记录开始。</p>
-          ) : (
-            <ul className="char-list">
-              {chars.map((c) => (
-                <li key={c.id} className={c.id === activeId ? "is-active" : ""}>
-                  <div>
-                    <strong>{c.name}</strong>
-                    <span className="meta">
-                      {c.consent.relation} · {formatTs(c.createdAt)}
-                      {c.id === activeId ? " · 当前使用" : ""}
-                    </span>
-                  </div>
-                  <div className="char-actions">
-                    {c.id !== activeId ? (
-                      <button type="button" onClick={() => void activate(c.id)}>
-                        使用
+              {import.meta.env.DEV ? (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => void loadDemo()}
+                  disabled={busy}
+                >
+                  载入演示角色（小鹿）
+                </button>
+              ) : null}
+            </div>
+            {loading ? (
+              <p>加载中…</p>
+            ) : chars.length === 0 ? (
+              <p className="manager-empty">还没有角色。点「新建角色」从聊天记录开始。</p>
+            ) : (
+              <ul className="char-list">
+                {chars.map((c) => (
+                  <li key={c.id} className={c.id === activeId ? "is-active" : ""}>
+                    <div>
+                      <strong>{c.name}</strong>
+                      <span className="meta">
+                        {c.consent.relation} · {formatTs(c.createdAt)}
+                        {c.id === activeId ? " · 当前使用" : ""}
+                      </span>
+                    </div>
+                    <div className="char-actions">
+                      {c.id !== activeId ? (
+                        <button type="button" onClick={() => void activate(c.id)}>
+                          使用
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={async () => {
+                          const p = await repo.get(c.id);
+                          if (!p?.persona) return;
+                          setDraftId(c.id);
+                          setPersona(p.persona);
+                          setStep("persona");
+                        }}
+                      >
+                        编辑人格卡
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={async () => {
-                        const p = await repo.get(c.id);
-                        if (!p?.persona) return;
-                        setDraftId(c.id);
-                        setPersona(p.persona);
-                        setStep("persona");
-                      }}
-                    >
-                      编辑人格卡
-                    </button>
-                    <button type="button" className="danger" onClick={() => void removeChar(c.id)}>
-                      删除
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => void removeChar(c.id)}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
       ) : null}
 
       {step === "consent" ? (

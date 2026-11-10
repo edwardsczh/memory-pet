@@ -1,17 +1,12 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseImport } from "../core/ingest";
+import demoFixture from "../../fixtures/demo/xiaolu-wechat-exporter.json?raw";
 import type { ConsentRecord } from "../core/model";
 import { buildCharacterRecord } from "./buildCharacter";
 
 describe("buildCharacterRecord", () => {
   it("builds 小鹿 from wechat exporter fixture", async () => {
-    const raw = readFileSync(
-      join(__dirname, "../../fixtures/demo/xiaolu-wechat-exporter.json"),
-      "utf8",
-    );
-    const parsed = parseImport("xiaolu-wechat-exporter.json", raw);
+    const parsed = parseImport("xiaolu-wechat-exporter.json", demoFixture);
     const consent: ConsentRecord = {
       subject: "living",
       subjectName: "小鹿",
