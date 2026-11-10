@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import type { Character, LlmClient } from "../../core/model";
@@ -11,6 +11,11 @@ import {
 } from "../../core/llm/tauriClient";
 import { CHARACTERS_CHANGED_EVENT, createCharacterRepo } from "../../core/storage/characters";
 import { getVault } from "../../core/storage/vault";
+import {
+  PROACTIVE_GREET_DELAY_MS,
+  proactiveGreetText,
+  shouldGreet,
+} from "../../core/schedule/proactive";
 import { createChatBackend } from "./backend";
 import { ChatSession, type Bubble, type ChatState } from "./ChatSession";
 
@@ -140,6 +145,44 @@ export function useChatSession({ enabled, restMs = 15 * 60_000, onRest }: UseCha
       alive = false;
     };
   }, [enabled, reloadKey, session, usage]);
+
+  const proactiveKey = `${reloadKey}:${character?.id ?? ""}`;
+  const proactiveAttempted = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!enabled || !character || !state.ready) return;
+    if (!usage.canActProactively()) return;
+    if (proactiveAttempted.current === proactiveKey) return;
+
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const repo = createCharacterRepo(getVault());
+
+    void (async () => {
+      const lastGreet = await repo.getLastProactiveGreet();
+      if (!alive) return;
+      const plannedAt = Date.now() + PROACTIVE_GREET_DELAY_MS;
+      if (!shouldGreet(plannedAt, lastGreet)) return;
+
+      timer = setTimeout(() => {
+        if (!alive) return;
+        if (!usage.canActProactively()) return;
+        const now = Date.now();
+        void (async () => {
+          const last = await repo.getLastProactiveGreet();
+          if (!shouldGreet(now, last)) return;
+          proactiveAttempted.current = proactiveKey;
+          session.notify(proactiveGreetText(now, character));
+          await repo.setLastProactiveGreet(now);
+        })().catch((err: unknown) => console.error("proactive greet", err));
+      }, PROACTIVE_GREET_DELAY_MS);
+    })().catch((err: unknown) => console.error("proactive greet", err));
+
+    return () => {
+      alive = false;
+      if (timer !== undefined) clearTimeout(timer);
+    };
+  }, [enabled, character, state.ready, proactiveKey, session, usage]);
 
   const openManager = useCallback(() => {
     openManagerWindow().catch(() =>
