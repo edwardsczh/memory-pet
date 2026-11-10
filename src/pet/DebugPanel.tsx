@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { Emotion } from "../core/model";
 import { CHARACTERS } from "./avatar/characters";
 import { EMOTIONS } from "./avatar/manifest";
@@ -20,6 +20,8 @@ interface DebugPanelProps {
   onCharacter: (id: string) => void;
   onEmotion: (emotion: Emotion) => void;
   onTalking: (talking: boolean) => void;
+  /** Extra dev controls rendered below the built-in rows. */
+  children?: ReactNode;
 }
 
 /** Dev-only controls for switching character / expression / talking. */
@@ -65,6 +67,7 @@ export function DebugPanel(props: DebugPanelProps) {
           </button>
         ))}
       </div>
+      {props.children}
     </div>
   );
 }

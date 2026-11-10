@@ -15,8 +15,8 @@
       {
         "label": "pet",
         "title": "记忆桌宠",
-        "width": 280,
-        "height": 380,
+        "width": 360,
+        "height": 560,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,

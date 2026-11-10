@@ -9,7 +9,8 @@
 │ WebView 前端（React + TypeScript，src/）             │
 │  ├ 桌宠舞台：角色、气泡、命中测试                     │
 │  ├ 设置窗口：模型服务商、API Key、连接测试            │
-│  └（后续）聊天面板、导入向导、记忆管理                │
+│  ├ 桌宠聊天：气泡连发、输入框、聊天记录面板          │
+│  └（后续）导入向导、记忆管理                          │
 │ Rust 核心（src-tauri/）                              │
 │  ├ 窗口：透明 / 无边框 / 置顶 / 位置记忆              │
 │  ├ 点击穿透：全局光标轮询 + set_ignore_cursor_events  │
@@ -118,11 +119,27 @@
 
 ### 调试
 
-开发模式（`import.meta.env.DEV`）左上角有“调试”按钮，展开后可切换角色、表情和说话状态。点击角色会随机换一个表情并“说”一句问候。
+开发模式（`import.meta.env.DEV`）左上角有“调试”按钮，展开后可切换角色、表情和说话状态（手动选的表情会覆盖对话表情，“表情跟随对话”恢复），以及桌宠聊天的调试项（见“桌宠聊天”）。
+
+## 桌宠聊天
+
+代码在 `src/pet/chat/`，`App.tsx` 只做布局。pet 窗口 360×560：角色在底部，上方是气泡区（打开聊天记录时换成记录面板），其余透明区域照常穿透。
+
+- **`ChatSession`**（`ChatSession.ts`）：不依赖 React / Tauri 的会话控制器，React 通过 `useSyncExternalStore` 订阅。`send(text)` → `backend.reply(history, text, {onDelta, onPartial})` → 气泡排队播放 → 回合结束写入 chatLog。
+  - 节奏（`pacing.ts`）：第一条气泡在发送后至少 350ms 出现（LLM 往返本身就算“打字时间”），之后每条间隔 `typingDelayMs(text, style)`；危机 / AI 身份这类出戏回复固定 500ms 间隔，不模拟打字。等待期间显示“正在输入…”。
+  - 流式：`onPartial` 每完成一条就进队列，所以首条气泡不必等整段 JSON。流式内容还没经过 `postcheck`，因此每条先过 `filterReply`（同一个“用户是否在告别”判断）+ `postprocess`，有任何违规就停止提前显示，剩下的等最终回复；最终回复到达后用 `remainingMessages` 去掉已显示的部分。chatLog 记录的是实际显示的气泡。
+  - 表情：等待时 `thinking`；说话时用最终回复的 emotion（流式时从 `"emotion"` 字段提前嗅探，没有就 `neutral`），每条气泡说话 `talkDurationMs`；回合结束保持 6 秒后回到 `neutral`。错误时 `sad`。
+  - 气泡：最多同时 3 条（含用户气泡），旧的淡出；说完 15 秒后全部淡出，带按钮的提示（去创建、打开设置、再试一次）保留。AI 生成的气泡都带 `AiBadge`，系统提示不带。
+  - chatLog：每条用户消息和每条宠物气泡各一个 `DialogueTurn`，保存最近 200 条（`MAX_LOG_TURNS`），最近 24 条作为上下文传给引擎。一次回复进行中不能再发送。
+- **`createChatBackend(character, deps)`**（`backend.ts`）：`DialogueEngine` + `createSafetyGuard`（角色名、关系、称呼、`subject`，`usage` 用使用时长计时器）。`gentleMode` 角色把 `GENTLE_RULES` 作为 `extraRules` 传入。没有人格卡时用名字和关系生成最小人格卡。示例索引从角色资产 `index` 加载，读不了就不用检索。
+- **`useChatSession`**：同意后读取 `getActiveId()` 对应的角色和资产 `index`、`chatLog`；监听 `CHARACTERS_CHANGED_EVENT` 后重新加载（切换角色会取消进行中的回合）。发送前 `preflight` 检查 LLM 设置：没有 Key 且不是本地地址时提示“先在设置里填 API Key”。没有角色时显示“还没有角色哦，点我去创建”，点击调用 `open_manager_window`（由主面板提供；命令不存在时提示）。
+- **交互**：单击角色打开输入框（再次单击重新聚焦），Enter 发送，Esc 关闭，失焦 8 秒自动收起；拖动仍是移动窗口。右键角色或工具条“记录”打开聊天记录面板（可清空）。光标停在角色上时出现工具条（记录 + `QuickControls` 静音 / 隐藏 / 退出）；悬停判断跟随 Rust 光标轮询（`useHover`），因为穿透时 webview 收不到指针事件。工具条隐藏时是 `visibility: hidden`，不参与命中测试。
+- **合规**：未同意时显示简化提示，点击后在窗口内展开完整 `FirstRunConsent`；同意前不加载角色、不能聊天。`reply.event.type === "crisis"` 时显示 `CrisisCard`（关闭前一直显示），`dependency` 的 `advice` 在回复后作为提示气泡出现。`createUsageTimer` 每 30 秒 tick，发送、点击、拖动都算活动；到点弹出 `UsageReminder`，“好的，休息一下”隐藏窗口 15 分钟后再显示并重新计时，“继续”不重置。静音调用 `setQuiet`。合规组件的半透明遮罩在 pet 窗口里改为透明（`chat.css`），避免把整块窗口矩形染灰。
+- **调试**（仅开发模式）：“载入示例角色”用 `fixtures/demo/xiaolu-wechat-exporter.json`（阿哲 = 用户，小鹿 = TA）在前端跑 `parseImport → cleanImport → buildStyleProfile → extractExemplars → ExemplarIndex`，存为角色 `demo-xiaolu` 并设为当前（`demoCharacter.ts`，懒加载，发行包不含演示数据）；“快进 2 小时”以每 5 分钟一次的模拟活动推进计时器时钟，走真实的空闲重置和提醒逻辑；“重看同意说明”撤回同意；调试面板显示上一轮首字 / 首条气泡 / 最后一条的耗时。
 
 ## 拖动与位置记忆
 
-- 在角色上按下并移动超过 4px 才调用 `startDragging()` 开始拖动；没有移动就松开算作点击（切换气泡和表情）。
+- 在角色上按下并移动超过 4px 才调用 `startDragging()` 开始拖动；没有移动就松开算作点击（打开输入框）。
 - 窗口 `Moved` 事件只记录最新位置，由轮询线程在位置稳定 500ms 后写入 `<app_config_dir>/window-state.json`；退出时再立即写一次。
 - 启动时先定位再显示窗口（配置里 `visible: false`），避免闪烁。如果保存的位置不在任何已连接的显示器上（例如拔掉了副屏），回退到主显示器右下角。
 
