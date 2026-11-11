@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { MessageKind, ParsedImport, SourceFormat } from "../model";
-import { ImportFormatError, decodeBytes, detectFormat, parseImport } from "./index";
+import {
+  ImportFormatError,
+  decodeBytes,
+  detectFormat,
+  parseImport,
+  parseImportBytes,
+} from "./index";
 import { parseDateTime } from "./time";
 import keeperQQ from "../../../fixtures/formats/chatlog-keeper-qq.json?raw";
 import keeperWechat from "../../../fixtures/formats/chatlog-keeper-wechat.json?raw";
@@ -252,6 +258,25 @@ describe("plain text variants", () => {
     expect(p.messages[0].ts).toBe(Date.UTC(2024, 0, 2, 13, 3));
   });
 
+  it("backup TXT with time, sender and body on separate lines", () => {
+    const p = parse(
+      [
+        "2024-01-02 21:03:05",
+        "小鹿",
+        "在吗",
+        "真的",
+        "",
+        "2024-01-02 21:03:40",
+        "阿哲: 刚下班",
+      ].join("\n"),
+    );
+    expect(p.format).toBe("plain-text");
+    expect(p.messages.map((m) => [m.sender, m.text])).toEqual([
+      ["小鹿", "在吗\n真的"],
+      ["阿哲", "刚下班"],
+    ]);
+  });
+
   it("WeChat PC copy: sender then date-time", () => {
     const p = parse("小鹿 2024/1/2 21:03:05\n你好呀\n阿哲 2024/1/2 21:03:30\n你好");
     expect(p.messages.map((m) => m.sender)).toEqual(["小鹿", "阿哲"]);
@@ -310,6 +335,120 @@ describe("generic CSV / JSON", () => {
       "时间\t发送者\t类型\t内容\n2024-01-02 21:03\t小鹿\t图片\t\n2024-01-02 21:04\t阿哲\t文本\t好看",
     );
     expect(p.messages.map((m) => m.kind)).toEqual(["image", "text"]);
+  });
+
+  it("PyWxDump backup JSON uses talker, msg and is_sender", () => {
+    const p = parseImport(
+      "wxid_0_10.json",
+      JSON.stringify([
+        {
+          id: 1,
+          MsgSvrID: "1",
+          type_name: "文本",
+          is_sender: 0,
+          talker: "小鹿",
+          room_name: "wxid_a",
+          msg: "在吗",
+          CreateTime: "2024-01-02 21:03:00",
+        },
+        {
+          id: 2,
+          MsgSvrID: "2",
+          type_name: "文本",
+          is_sender: 1,
+          talker: "我",
+          room_name: "wxid_a",
+          msg: "在",
+          CreateTime: "2024-01-02 21:03:20",
+        },
+        {
+          id: 3,
+          MsgSvrID: "3",
+          type_name: "图片",
+          is_sender: 0,
+          talker: "小鹿",
+          msg: "图片",
+          CreateTime: "2024-01-02 21:05:00",
+        },
+      ]),
+    );
+    expect(p.format).toBe("generic-json");
+    expect(p.selfSender).toBe("我");
+    expect(p.messages.map((m) => [m.sender, m.text, m.kind])).toEqual([
+      ["小鹿", "在吗", "text"],
+      ["我", "在", "text"],
+      ["小鹿", "图片", "image"],
+    ]);
+  });
+
+  it("reads text nested in content.msg and a file that groups several chats", () => {
+    const p = parseImport(
+      "backup.json",
+      JSON.stringify({
+        wxid_short: [
+          {
+            CreateTime: "2024-01-02 21:03:00",
+            talker: "小鹿",
+            content: { src: "", msg: "只此一条" },
+          },
+        ],
+        wxid_long: [
+          {
+            CreateTime: "2024-01-02 21:03:00",
+            talker: "小鹿",
+            is_sender: 0,
+            content: { msg: "在吗" },
+          },
+          {
+            CreateTime: "2024-01-02 21:03:20",
+            talker: "我",
+            is_sender: 1,
+            content: { msg: "在" },
+          },
+        ],
+      }),
+    );
+    expect(p.messages.map((m) => m.text)).toEqual(["在吗", "在"]);
+    expect(p.warnings[0]).toMatch(/2 个会话/);
+    expect(p.warnings[0]).toMatch(/wxid_long/);
+  });
+
+  it("reads JSONL backup dumps", () => {
+    const p = parseImport(
+      "dump.jsonl",
+      [
+        '{"CreateTime":"2024-01-02 21:03:00","talker":"小鹿","msg":"在吗"}',
+        '{"CreateTime":"2024-01-02 21:03:20","talker":"我","msg":"在","is_sender":1}',
+      ].join("\n"),
+    );
+    expect(p.format).toBe("generic-json");
+    expect(p.selfSender).toBe("我");
+    expect(p.messages.map((m) => m.text)).toEqual(["在吗", "在"]);
+  });
+
+  it("decodes a GB18030 backup before parsing", () => {
+    const ascii = (s: string) => [...s].map((c) => c.charCodeAt(0));
+    const bytes = new Uint8Array([
+      ...ascii('[{"CreateTime":"2024-01-02 21:03:00","talker":"'),
+      0xd0,
+      0xa1,
+      0xc2,
+      0xb9, // 小鹿
+      ...ascii('","msg":"'),
+      0xba,
+      0xc3, // 好
+      ...ascii('"},{"CreateTime":"2024-01-02 21:03:20","talker":"'),
+      0xba,
+      0xc3,
+      ...ascii('","msg":"'),
+      0xba,
+      0xc3,
+      ...ascii('","is_sender":1}]'),
+    ]);
+    const p = parseImportBytes("backup.json", bytes);
+    expect(p.selfSender).toBe("好");
+    expect(p.messages.map((m) => m.sender)).toEqual(["小鹿", "好"]);
+    expect(p.messages[0].text).toBe("好");
   });
 
   it("JSON template wrapped in an object, epoch ms", () => {

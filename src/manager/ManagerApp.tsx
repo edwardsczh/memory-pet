@@ -7,7 +7,7 @@ import type {
   SpeakerMapping,
   SubjectStatus,
 } from "../core/model";
-import { parseImport } from "../core/ingest";
+import { parseImportBytes } from "../core/ingest";
 import { createTauriLlmClient } from "../core/llm/tauriClient";
 import { CHARACTERS } from "../pet/avatar/characters";
 import { createCharacterRepo, type CharacterRepo } from "../core/storage/characters";
@@ -119,8 +119,7 @@ export default function ManagerApp() {
   const onFile = async (file: File) => {
     setError(null);
     try {
-      const text = await file.text();
-      const p = parseImport(file.name, text);
+      const p = parseImportBytes(file.name, new Uint8Array(await file.arrayBuffer()));
       setParsed(p);
       setFileName(file.name);
       const me = p.selfSender ? [p.selfSender] : [];
