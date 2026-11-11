@@ -41,11 +41,11 @@
 
 本产品**不**内置微信解密，只解析导出文件。常用工具（任选其一，操作细节见 [docs/import-guide.md](docs/import-guide.md)）：
 
-| 工具 | 说明 |
-|------|------|
-| [chatlog-keeper](https://github.com/labazhou2024/chatlog-keeper) | 微信 / QQ JSON 等 |
-| [WeChatExporter](https://github.com/93857536-pixel/WeChatExporter) | JSON / TXT |
-| [wx-cli](https://github.com/jackwener/wx-cli) | JSON / Markdown |
+| 工具                                                               | 说明              |
+| ------------------------------------------------------------------ | ----------------- |
+| [chatlog-keeper](https://github.com/labazhou2024/chatlog-keeper)   | 微信 / QQ JSON 等 |
+| [WeChatExporter](https://github.com/93857536-pixel/WeChatExporter) | JSON / TXT        |
+| [wx-cli](https://github.com/jackwener/wx-cli)                      | JSON / Markdown   |
 
 导出后通过「角色管理 → 导入」选择文件即可。
 
