@@ -5,3 +5,6 @@ src-tauri/gen
 package-lock.json
 public/avatar/*/source/*.min.json
 fixtures
+ocr/*.traineddata
+public/tesseract
+public/tessdata

@@ -29,6 +29,37 @@ describe("buildCharacterRecord", () => {
   });
 });
 
+describe("buildCharacterRecord without a screenshot", () => {
+  it("builds from a small JSON import", async () => {
+    const parsed = parseImport(
+      "chat.json",
+      JSON.stringify([
+        { time: "2024-01-02 21:03:00", sender: "阿哲", text: "在吗" },
+        { time: "2024-01-02 21:03:20", sender: "小鹿", text: "在的呀" },
+      ]),
+    );
+    const { character, assets } = await buildCharacterRecord(
+      {
+        subject: "living",
+        subjectName: "小鹿",
+        relation: "女朋友",
+        subjectConsented: true,
+        personalUseOnly: true,
+        voiceConsent: false,
+        declaredAt: 1,
+        ageAdult: true,
+      },
+      parsed,
+      { me: ["阿哲"], ta: ["小鹿"] },
+      { now: 5 },
+    );
+    expect(character.name).toBe("小鹿");
+    expect(character.persona?.userNotes ?? "").not.toMatch(/截图/);
+    expect(assets.report.kept).toBe(2);
+    expect(assets.sessions.length).toBeGreaterThan(0);
+  });
+});
+
 describe("buildPromptCharacter", () => {
   const consent: ConsentRecord = {
     subject: "living",
