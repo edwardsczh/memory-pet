@@ -259,11 +259,58 @@ label.drop-zone input {
   line-height: 1.45;
 }
 
-.screenshot-list {
-  margin: 0.25rem 0 0.75rem;
-  padding-left: 1.2rem;
-  color: #666;
-  font-size: 0.85rem;
+.screenshot-review {
+  margin-top: 0.75rem;
+}
+
+.screenshot-shot {
+  margin: 0.75rem 0;
+  padding-top: 0.65rem;
+  border-top: 1px solid #eee;
+}
+
+.screenshot-shot header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.screenshot-shot header button,
+.screenshot-lines button {
+  flex: none;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.screenshot-lines {
+  list-style: none;
+  padding: 0;
+  margin: 0.35rem 0 0;
+}
+
+.screenshot-lines li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.screenshot-lines .who {
+  flex: none;
+  min-width: 2.5rem;
+  color: #3d6b5a;
+  font-weight: 600;
+}
+
+.screenshot-lines .text {
+  flex: 1;
 }
 
 .mapping {

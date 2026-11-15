@@ -1,0 +1,9 @@
+chi_sim.traineddata
+
+Simplified Chinese LSTM model from tessdata_fast 4.1.0
+https://github.com/tesseract-ocr/tessdata_fast/raw/4.1.0/chi_sim.traineddata
+
+License: Apache-2.0
+https://github.com/tesseract-ocr/tessdata_fast/blob/4.1.0/LICENSE
+
+The desktop app reads this file from the install. It is not downloaded when a screenshot is dropped.

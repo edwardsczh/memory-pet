@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Copied from node_modules and ocr/ when the app or tests start.
+public/tesseract
+public/tessdata
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

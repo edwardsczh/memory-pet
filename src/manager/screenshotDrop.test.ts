@@ -1,26 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { SCREENSHOT_UNREAD, acceptScreenshotDrop } from "./screenshotDrop";
+import { acceptScreenshotDrop, isScreenshotFile } from "./screenshotDrop";
 
 describe("acceptScreenshotDrop", () => {
-  it("accepts images and does not pretend any line was extracted", () => {
+  it("accepts png, jpg, and webp and does not invent text", () => {
     const drop = acceptScreenshotDrop([
       { name: "微信截图.png", type: "image/png" },
       { name: "chat.jpg", type: "" },
+      { name: "chat.webp", type: "image/webp" },
       { name: "backup.json", type: "application/json" },
+      { name: "sticker.gif", type: "image/gif" },
     ]);
-    expect(drop.images).toEqual([{ name: "微信截图.png" }, { name: "chat.jpg" }]);
-    expect(drop.ignored).toEqual(["backup.json"]);
-    expect(drop.message).toBe(SCREENSHOT_UNREAD);
-    expect(drop.message).toMatch(/还不能读取图片/);
-    expect(drop.message).toMatch(/没有从截图里抽出任何句子/);
+    expect(drop.images).toEqual([
+      { name: "微信截图.png" },
+      { name: "chat.jpg" },
+      { name: "chat.webp" },
+    ]);
+    expect(drop.ignored).toEqual(["backup.json", "sticker.gif"]);
     expect(drop).not.toHaveProperty("messages");
     expect(drop).not.toHaveProperty("text");
     expect(JSON.stringify(drop)).not.toMatch(/在吗|小鹿:/);
+    expect(isScreenshotFile({ name: "a.JPEG", type: "" })).toBe(true);
   });
 
-  it("stays quiet when nothing is an image", () => {
+  it("stays quiet when nothing is a screenshot", () => {
     const drop = acceptScreenshotDrop([{ name: "notes.txt", type: "text/plain" }]);
     expect(drop.images).toEqual([]);
-    expect(drop.message).toBeNull();
+    expect(drop.ignored).toEqual(["notes.txt"]);
   });
 });

@@ -23,7 +23,22 @@ import {
   serializeConsentExport,
 } from "../core/export/consentExport";
 import { notifyCharactersChanged } from "./notify";
-import { SCREENSHOT_UNREAD, acceptScreenshotDrop, isImageFile } from "./screenshotDrop";
+import { acceptScreenshotDrop, isImageFile, isScreenshotFile } from "./screenshotDrop";
+import { prepareScreenshotFile } from "./screenshotPrepare";
+import {
+  DISCARD_NOTE,
+  WHO_LABEL,
+  deleteReviewLine,
+  deleteReviewPicture,
+  discardReview,
+  mappingForScreenshot,
+  nextPictureId,
+  readingPicture,
+  reviewToImport,
+  settlePicture,
+  unreadablePicture,
+  type ReviewPicture,
+} from "./screenshotReview";
 import { BlindEvalSection } from "./BlindEvalSection";
 import "./manager.css";
 
@@ -73,7 +88,8 @@ export default function ManagerApp() {
   const [persona, setPersona] = useState<PersonaCard | null>(null);
   const [useLlm, setUseLlm] = useState(false);
   const [prompt, setPrompt] = useState("");
-  const [droppedImages, setDroppedImages] = useState<{ name: string }[]>([]);
+  const [pictures, setPictures] = useState<ReviewPicture[]>([]);
+  const [discardNote, setDiscardNote] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -107,21 +123,76 @@ export default function ManagerApp() {
     setError(null);
     setUseLlm(false);
     setPrompt("");
-    setDroppedImages([]);
+    setPictures([]);
+    setDiscardNote(null);
     setStep("consent");
   };
 
   const onScreenshots = (list: FileList | File[]) => {
-    const drop = acceptScreenshotDrop(
-      [...list].map((file) => ({ name: file.name, type: file.type })),
-    );
-    if (drop.images.length > 0) {
-      setDroppedImages((prev) => [...prev, ...drop.images]);
-    }
+    const files = [...list];
+    const drop = acceptScreenshotDrop(files.map((file) => ({ name: file.name, type: file.type })));
     if (drop.ignored.length > 0) {
-      setError(`截图区只接收图片：${drop.ignored.join("、")}`);
+      setError(`截图区只接收 png、jpg、webp：${drop.ignored.join("、")}`);
     } else {
       setError(null);
+    }
+    setDiscardNote(null);
+    const accepted = files.filter((file) => isScreenshotFile({ name: file.name, type: file.type }));
+    if (accepted.length === 0) return;
+    const pending = accepted.map((file) => ({ file, id: nextPictureId() }));
+    setPictures((prev) => [
+      ...prev,
+      ...pending.map(({ file, id }) => readingPicture(id, file.name)),
+    ]);
+    void (async () => {
+      const { recognizeScreenshot } = await import("./screenshotOcr");
+      for (const { file, id } of pending) {
+        try {
+          const prepared = await prepareScreenshotFile(file);
+          const lines = await recognizeScreenshot(prepared.bytes, prepared.width);
+          setPictures((prev) =>
+            prev.map((picture) => (picture.id === id ? settlePicture(picture, lines) : picture)),
+          );
+        } catch {
+          setPictures((prev) =>
+            prev.map((picture) => (picture.id === id ? unreadablePicture(picture) : picture)),
+          );
+        }
+      }
+    })();
+  };
+
+  const screenshotsReading = pictures.some((picture) => picture.status === "reading");
+  const screenshotLineCount = pictures.reduce((count, picture) => count + picture.lines.length, 0);
+
+  const discardScreenshots = () => {
+    setPictures(discardReview().pictures);
+    setDiscardNote(DISCARD_NOTE);
+  };
+
+  const confirmScreenshots = async () => {
+    const imported = reviewToImport(pictures);
+    if (!imported) {
+      setError("没有可保存的句子。");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const { character, assets } = await buildCharacterRecord(
+        consent,
+        imported,
+        mappingForScreenshot(imported),
+        { avatar: consent.subject === "self" ? "kai" : "momo" },
+      );
+      await saveBuilt(character, assets);
+      setPictures([]);
+      setDiscardNote(null);
+      setStep("report");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "构建角色失败");
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -457,7 +528,7 @@ export default function ManagerApp() {
             把微信聊天截图拖到这里，或点此选择图片
             <input
               type="file"
-              accept="image/*"
+              accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"
               multiple
               onChange={(e) => {
                 if (e.target.files && e.target.files.length > 0) onScreenshots(e.target.files);
@@ -465,17 +536,72 @@ export default function ManagerApp() {
               }}
             />
           </label>
-          {droppedImages.length > 0 ? (
-            <>
-              <p className="screenshot-note" role="status">
-                {SCREENSHOT_UNREAD}
-              </p>
-              <ul className="screenshot-list">
-                {droppedImages.map((img, i) => (
-                  <li key={`${img.name}-${i}`}>{img.name}（未读取）</li>
-                ))}
-              </ul>
-            </>
+          <p className="hint">
+            文字在这台电脑上读取，不会上传。保存前可以看每句是谁说的，也可以删掉。
+          </p>
+          {discardNote ? (
+            <p className="screenshot-note" role="status">
+              {discardNote}
+            </p>
+          ) : null}
+          {pictures.length > 0 ? (
+            <div className="screenshot-review">
+              {pictures.map((picture) => (
+                <section key={picture.id} className="screenshot-shot">
+                  <header>
+                    <strong>{picture.name}</strong>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPictures((prev) => deleteReviewPicture(prev, picture.id).pictures)
+                      }
+                    >
+                      删除这张图片
+                    </button>
+                  </header>
+                  {picture.status === "reading" ? (
+                    <p className="hint">正在读取这张图片里的文字…</p>
+                  ) : null}
+                  {picture.notice ? (
+                    <p className="screenshot-note" role="status">
+                      {picture.notice}
+                    </p>
+                  ) : null}
+                  {picture.lines.length > 0 ? (
+                    <ul className="screenshot-lines">
+                      {picture.lines.map((line) => (
+                        <li key={line.id}>
+                          <span className="who">{WHO_LABEL[line.who]}</span>
+                          <span className="text">{line.text}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPictures(
+                                (prev) => deleteReviewLine(prev, picture.id, line.id).pictures,
+                              )
+                            }
+                          >
+                            删除这句
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </section>
+              ))}
+              <div className="manager-actions">
+                <button type="button" className="secondary" onClick={discardScreenshots}>
+                  全部删除，不保存
+                </button>
+                <button
+                  type="button"
+                  disabled={screenshotsReading || screenshotLineCount === 0 || busy}
+                  onClick={() => void confirmScreenshots()}
+                >
+                  {screenshotsReading ? "正在读取…" : "确认这些句子"}
+                </button>
+              </div>
+            </div>
           ) : null}
           <h3>或者导入导出文件</h3>
           <p className="hint">
@@ -593,11 +719,6 @@ export default function ManagerApp() {
       {step === "persona" && persona ? (
         <section className="manager-panel">
           <h2>人格卡</h2>
-          {droppedImages.length > 0 ? (
-            <p className="screenshot-note" role="status">
-              {SCREENSHOT_UNREAD}
-            </p>
-          ) : null}
           <label>
             摘要
             <textarea
