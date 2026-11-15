@@ -133,10 +133,6 @@ export function parseImport(
 }
 
 /**
- * Decodes raw file bytes: UTF-8 (with or without BOM), UTF-16 with BOM (old QQ
- * TXT exports), falling back to GB18030 for legacy Windows exports.
- */
-/**
  * Reads a file the user chose in the import dialog. Decodes UTF-8, UTF-16 and
  * GB18030, then parses. Does not open or decrypt WeChat / QQ databases.
  */
@@ -148,6 +144,10 @@ export function parseImportBytes(
   return parseImport(fileName, decodeBytes(bytes), opts);
 }
 
+/**
+ * Decodes raw file bytes: UTF-8 (with or without BOM), UTF-16 with BOM (old QQ
+ * TXT exports), falling back to GB18030 for legacy Windows exports.
+ */
 export function decodeBytes(bytes: Uint8Array): string {
   if (bytes[0] === 0xff && bytes[1] === 0xfe)
     return new TextDecoder("utf-16le").decode(bytes.subarray(2));

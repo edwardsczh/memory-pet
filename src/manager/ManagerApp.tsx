@@ -8,6 +8,11 @@ import type {
   SubjectStatus,
 } from "../core/model";
 import { parseImportBytes } from "../core/ingest";
+import {
+  buildCharacterRecord,
+  buildPromptCharacter,
+  type BuiltCharacterAssets,
+} from "./buildCharacter";
 import { createTauriLlmClient } from "../core/llm/tauriClient";
 import { CHARACTERS } from "../pet/avatar/characters";
 import { createCharacterRepo, type CharacterRepo } from "../core/storage/characters";
@@ -17,8 +22,8 @@ import {
   consentExportFilename,
   serializeConsentExport,
 } from "../core/export/consentExport";
-import { buildCharacterRecord } from "./buildCharacter";
 import { notifyCharactersChanged } from "./notify";
+import { SCREENSHOT_UNREAD, acceptScreenshotDrop, isImageFile } from "./screenshotDrop";
 import { BlindEvalSection } from "./BlindEvalSection";
 import "./manager.css";
 
@@ -67,6 +72,8 @@ export default function ManagerApp() {
   const [error, setError] = useState<string | null>(null);
   const [persona, setPersona] = useState<PersonaCard | null>(null);
   const [useLlm, setUseLlm] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [droppedImages, setDroppedImages] = useState<{ name: string }[]>([]);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -99,7 +106,23 @@ export default function ManagerApp() {
     setPersona(null);
     setError(null);
     setUseLlm(false);
+    setPrompt("");
+    setDroppedImages([]);
     setStep("consent");
+  };
+
+  const onScreenshots = (list: FileList | File[]) => {
+    const drop = acceptScreenshotDrop(
+      [...list].map((file) => ({ name: file.name, type: file.type })),
+    );
+    if (drop.images.length > 0) {
+      setDroppedImages((prev) => [...prev, ...drop.images]);
+    }
+    if (drop.ignored.length > 0) {
+      setError(`截图区只接收图片：${drop.ignored.join("、")}`);
+    } else {
+      setError(null);
+    }
   };
 
   const activeChar = useMemo(
@@ -117,6 +140,10 @@ export default function ManagerApp() {
   }, [consent]);
 
   const onFile = async (file: File) => {
+    if (isImageFile(file)) {
+      onScreenshots([file]);
+      return;
+    }
     setError(null);
     try {
       const p = parseImportBytes(file.name, new Uint8Array(await file.arrayBuffer()));
@@ -135,6 +162,39 @@ export default function ManagerApp() {
     }
   };
 
+  const saveBuilt = async (character: Character, assets: BuiltCharacterAssets) => {
+    await repo.save(character);
+    await repo.putAsset(character.id, "sessions", assets.sessions);
+    await repo.putAsset(character.id, "index", assets.index.toJSON());
+    await repo.putAsset(character.id, "holdout", assets.holdout.holdout);
+    await repo.putAsset(character.id, "importReport", assets.report);
+    await repo.setActiveId(character.id);
+    setDraftId(character.id);
+    setPersona(character.persona ?? null);
+    await notifyCharactersChanged();
+    void reload();
+  };
+
+  const runPrompt = async () => {
+    if (!prompt.trim()) {
+      setError("请先写一段提示");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const { character, assets } = buildPromptCharacter(consent, prompt, {
+        avatar: consent.subject === "self" ? "kai" : "momo",
+      });
+      await saveBuilt(character, assets);
+      setStep("persona");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "构建角色失败");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const runBuild = async () => {
     if (!parsed || mapping.me.length === 0 || mapping.ta.length === 0) {
       setError("请选择“我”和 TA 对应的昵称");
@@ -149,16 +209,7 @@ export default function ManagerApp() {
         llm,
         avatar: consent.subject === "self" ? "kai" : "momo",
       });
-      await repo.save(character);
-      await repo.putAsset(character.id, "sessions", assets.sessions);
-      await repo.putAsset(character.id, "index", assets.index.toJSON());
-      await repo.putAsset(character.id, "holdout", assets.holdout.holdout);
-      await repo.putAsset(character.id, "importReport", assets.report);
-      await repo.setActiveId(character.id);
-      setDraftId(character.id);
-      setPersona(character.persona ?? null);
-      await notifyCharactersChanged();
-      void reload();
+      await saveBuilt(character, assets);
       setStep("report");
     } catch (e) {
       setError(e instanceof Error ? e.message : "构建角色失败");
@@ -217,7 +268,7 @@ export default function ManagerApp() {
     <div className="manager">
       <header className="manager-header">
         <h1>记忆桌宠 · 角色管理</h1>
-        <p className="manager-sub">导入聊天记录，创建会用 TA 语气说话的角色</p>
+        <p className="manager-sub">写一段提示就能创建角色，也可以再导入聊天导出文件</p>
       </header>
 
       {error ? <p className="manager-error">{error}</p> : null}
@@ -246,7 +297,7 @@ export default function ManagerApp() {
             {loading ? (
               <p>加载中…</p>
             ) : chars.length === 0 ? (
-              <p className="manager-empty">还没有角色。点「新建角色」从聊天记录开始。</p>
+              <p className="manager-empty">还没有角色。点「新建角色」，写一段提示就能开始。</p>
             ) : (
               <ul className="char-list">
                 {chars.map((c) => (
@@ -376,7 +427,7 @@ export default function ManagerApp() {
               返回
             </button>
             <button type="button" disabled={!canConsent} onClick={() => setStep("import")}>
-              下一步：导入聊天
+              下一步：写提示
             </button>
           </div>
         </section>
@@ -384,12 +435,56 @@ export default function ManagerApp() {
 
       {step === "import" ? (
         <section className="manager-panel">
-          <h2>导入聊天记录</h2>
-          <p className="hint">支持微信/QQ 导出 JSON、TXT 等，详见 docs/import-guide.md</p>
+          <h2>写一段提示</h2>
+          <p className="hint">不用先选文件。写下这个宠物怎么说话，就可以创建。</p>
+          <label>
+            提示
+            <textarea
+              rows={4}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="例如：说话很短，喜欢用「嘛」，会叫我宝"
+            />
+          </label>
+          <label
+            className="drop-zone"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files.length > 0) onScreenshots(e.dataTransfer.files);
+            }}
+          >
+            把微信聊天截图拖到这里，或点此选择图片
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) onScreenshots(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {droppedImages.length > 0 ? (
+            <>
+              <p className="screenshot-note" role="status">
+                {SCREENSHOT_UNREAD}
+              </p>
+              <ul className="screenshot-list">
+                {droppedImages.map((img, i) => (
+                  <li key={`${img.name}-${i}`}>{img.name}（未读取）</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          <h3>或者导入导出文件</h3>
+          <p className="hint">
+            支持微信/QQ 导出 JSON、TXT 等，详见 docs/import-guide.md。不读取微信数据库。
+          </p>
           <label className="file">
             <input
               type="file"
-              accept=".json,.txt,.csv,.md,.mht"
+              accept=".json,.txt,.csv,.md,.mht,image/*"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) void onFile(f);
@@ -473,8 +568,15 @@ export default function ManagerApp() {
             <button type="button" className="secondary" onClick={() => setStep("consent")}>
               上一步
             </button>
+            <button
+              type="button"
+              disabled={!prompt.trim() || busy}
+              onClick={() => void runPrompt()}
+            >
+              {busy ? "处理中…" : "用这段提示创建"}
+            </button>
             <button type="button" disabled={!parsed || busy} onClick={() => void runBuild()}>
-              {busy ? "处理中…" : "生成角色"}
+              {busy ? "处理中…" : "从文件生成"}
             </button>
           </div>
         </section>
@@ -491,6 +593,11 @@ export default function ManagerApp() {
       {step === "persona" && persona ? (
         <section className="manager-panel">
           <h2>人格卡</h2>
+          {droppedImages.length > 0 ? (
+            <p className="screenshot-note" role="status">
+              {SCREENSHOT_UNREAD}
+            </p>
+          ) : null}
           <label>
             摘要
             <textarea
