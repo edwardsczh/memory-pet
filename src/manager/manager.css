@@ -231,12 +231,39 @@ label.file input {
   display: none;
 }
 
-label.file {
+label.file,
+label.drop-zone {
   border: 2px dashed #bbb;
   padding: 1rem;
   text-align: center;
   border-radius: 8px;
   cursor: pointer;
+}
+
+label.drop-zone input {
+  display: none;
+}
+
+.manager-panel h3 {
+  margin: 1.25rem 0 0.35rem;
+  font-size: 1rem;
+}
+
+.screenshot-note {
+  margin: 0.75rem 0 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: #fff6e8;
+  color: #6a4b16;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.screenshot-list {
+  margin: 0.25rem 0 0.75rem;
+  padding-left: 1.2rem;
+  color: #666;
+  font-size: 0.85rem;
 }
 
 .mapping {

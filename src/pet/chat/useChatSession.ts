@@ -16,6 +16,7 @@ import {
   proactiveGreetText,
   shouldGreet,
 } from "../../core/schedule/proactive";
+import { NO_API_KEY_EXPLANATION, needsApiKey } from "./apiKeyGate";
 import { createChatBackend } from "./backend";
 import { ChatSession, type Bubble, type ChatState } from "./ChatSession";
 
@@ -25,20 +26,12 @@ const browserLlm: LlmClient = {
   complete: () => Promise.reject("浏览器预览里连不上模型，请用 npm run tauri dev 运行"),
 };
 
-function isLocalUrl(url: string): boolean {
-  try {
-    return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname);
-  } catch {
-    return false;
-  }
-}
-
 async function llmPreflight() {
   if (!isTauri()) return null;
   const s = await getLlmSettings();
-  if (s.hasKey || isLocalUrl(s.baseUrl)) return null;
+  if (!needsApiKey(s)) return null;
   return {
-    text: "先在设置里填 API Key，我才能开口说话哦",
+    text: NO_API_KEY_EXPLANATION,
     action: { kind: "open-settings" as const, label: "打开设置" },
   };
 }
@@ -70,9 +63,16 @@ export interface UseChatSessionOptions {
   /** "好的，休息一下" hides the pet for this long. */
   restMs?: number;
   onRest?: (ms: number) => void;
+  /** Fired when a send is blocked because no API key is saved. */
+  onNeedKey?: () => void;
 }
 
-export function useChatSession({ enabled, restMs = 15 * 60_000, onRest }: UseChatSessionOptions) {
+export function useChatSession({
+  enabled,
+  restMs = 15 * 60_000,
+  onRest,
+  onNeedKey,
+}: UseChatSessionOptions) {
   const [session] = useState(() => new ChatSession());
   const state = useSyncExternalStore(session.subscribe, session.getState);
   const [character, setCharacter] = useState<Character | null | undefined>(undefined);
@@ -130,7 +130,11 @@ export function useChatSession({ enabled, restMs = 15 * 60_000, onRest }: UseCha
         usage,
         index,
         saveLog: (l) => repo.putAsset(c.id, "chatLog", l),
-        preflight: llmPreflight,
+        preflight: async () => {
+          const notice = await llmPreflight();
+          if (notice) onNeedKey?.();
+          return notice;
+        },
       });
       setCharacter(c);
       session.setBackend(backend, log ?? []);
@@ -144,7 +148,7 @@ export function useChatSession({ enabled, restMs = 15 * 60_000, onRest }: UseCha
     return () => {
       alive = false;
     };
-  }, [enabled, reloadKey, session, usage]);
+  }, [enabled, reloadKey, session, usage, onNeedKey]);
 
   const proactiveKey = `${reloadKey}:${character?.id ?? ""}`;
   const proactiveAttempted = useRef<string | null>(null);

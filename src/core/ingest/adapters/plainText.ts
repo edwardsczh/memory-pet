@@ -7,6 +7,8 @@
  * - headerLine:     `2024-01-02 21:03:05 小鹿` + content lines (QQ 消息管理器 TXT)
  * - senderDateTime: `小鹿 2024/1/2 21:03:05` + content lines (WeChat PC copy)
  * - senderTime:     `小鹿 21:03` + content lines      (wx-cli 0.7 TXT, phone copy)
+ * - stacked:        a time-only line, then the sender, then the body
+ *                   (WeChatMsg / 留痕 TXT and similar backups)
  *
  * The dominant shape is picked once per file so content lines that happen to
  * look like a header of another shape stay content.
@@ -73,7 +75,8 @@ const PATTERNS: Record<LinePattern, PatternDef> = {
     needsDate: false,
   },
   senderTime: {
-    re: new RegExp(String.raw`^(\S.{0,39}?)\s+(${TIME})\s*$`),
+    // A bare "2024-01-02 21:03:05" is a timestamp, not a sender named the date.
+    re: new RegExp(String.raw`^(?!\d{4}\s*[-/.年])(\S.{0,39}?)\s+(${TIME})\s*$`),
     when: 2,
     sender: 1,
     needsDate: true,
@@ -88,6 +91,66 @@ const ORDER: LinePattern[] = [
   "bracketTime",
   "senderTime",
 ];
+
+const DATETIME_ONLY = new RegExp(String.raw`^(?:${DATETIME})$`);
+
+function senderOf(line: string): { sender: string; inline: string } | null {
+  const s = line.trim();
+  if (!s || DATETIME_ONLY.test(s)) return null;
+  const labeled = /^(.*?)[:：]\s*(.*)$/.exec(s);
+  const name = (labeled ? labeled[1] : s).trim();
+  if (!name || name.length > 40 || DATETIME_ONLY.test(name) || /[。！？!?]/.test(name)) return null;
+  return { sender: name, inline: labeled ? labeled[2].trim() : "" };
+}
+
+/** Backup TXT that puts the time, the sender and the body on separate lines. */
+export function detectStacked(lines: string[]): boolean {
+  let hits = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (!DATETIME_ONLY.test(lines[i].trim())) continue;
+    let j = i + 1;
+    while (j < lines.length && !lines[j].trim()) j++;
+    if (j < lines.length && senderOf(lines[j])) {
+      hits++;
+      if (hits >= 2) return true;
+    }
+  }
+  return false;
+}
+
+export function parseStacked(
+  lines: string[],
+  opts: ParseOptions,
+): { rows: RawMessage[]; warnings: string[] } {
+  const tz = opts.tzOffsetMinutes ?? DEFAULT_TZ_OFFSET_MINUTES;
+  const rows: RawMessage[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const stamp = lines[i].trim();
+    if (!DATETIME_ONLY.test(stamp)) {
+      i++;
+      continue;
+    }
+    const ts = parseDateTime(stamp, tz);
+    let j = i + 1;
+    while (j < lines.length && !lines[j].trim()) j++;
+    const who = j < lines.length ? senderOf(lines[j]) : null;
+    if (ts === null || !who) {
+      i++;
+      continue;
+    }
+    const content: string[] = [];
+    if (who.inline) content.push(who.inline);
+    let k = j + 1;
+    while (k < lines.length && !DATETIME_ONLY.test(lines[k].trim())) {
+      content.push(lines[k].replace(/\s+$/, ""));
+      k++;
+    }
+    rows.push({ ts, sender: who.sender, text: content.join("\n").trim() });
+    i = k;
+  }
+  return { rows, warnings: [] };
+}
 
 const DECORATED_DATE = new RegExp(
   String.raw`^(?:[—\-=─\s]+|日期[:：]\s*)(${DATE})(?:\s*(?:星期|周).)?[—\-=─\s]*$`,
@@ -183,6 +246,10 @@ function nextDay(d: CivilDate): CivilDate {
 }
 
 export function parsePlainText(content: string, opts: ParseOptions): ParsedImport {
-  const { rows, warnings } = parseLines(content.split(/\r?\n/), opts);
-  return buildImport("plain-text", rows, { warnings });
+  const lines = content.split(/\r?\n/);
+  const lined = parseLines(lines, opts);
+  if (lined.pattern && lined.rows.length)
+    return buildImport("plain-text", lined.rows, { warnings: lined.warnings });
+  const stacked = parseStacked(lines, opts);
+  return buildImport("plain-text", stacked.rows, { warnings: stacked.warnings });
 }

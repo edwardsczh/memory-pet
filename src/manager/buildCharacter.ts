@@ -55,6 +55,52 @@ export function fallbackPersona(
   };
 }
 
+const EMPTY_IMPORT: ParsedImport = {
+  format: "plain-text",
+  isGroup: false,
+  participants: [],
+  messages: [],
+  warnings: [],
+};
+
+/**
+ * A character from the prompt the user typed. No chat file is required, and
+ * nothing is invented as if lines had been read out of a screenshot.
+ */
+export function buildPromptCharacter(
+  consent: ConsentRecord,
+  prompt: string,
+  opts: { avatar?: string; now?: number } = {},
+): { character: Character; assets: BuiltCharacterAssets } {
+  const text = prompt.trim();
+  if (!text) throw new Error("请先写一段提示");
+  const now = opts.now ?? Date.now();
+  const name = consent.subjectName.trim();
+  const assets = buildAssets(EMPTY_IMPORT, { me: [], ta: [] });
+  const persona: PersonaCard = {
+    name,
+    relation: consent.relation.trim(),
+    summary: text,
+    traits: [],
+    addressing: [],
+    taboos: [],
+    userNotes: "没有导入聊天记录，也没有从截图里抽出句子。请只按上面的摘要说话。",
+    updatedAt: now,
+  };
+  const character: Character = {
+    id: newCharacterId(),
+    name,
+    consent,
+    persona,
+    style: assets.style,
+    avatar: opts.avatar ?? (consent.subject === "self" ? "kai" : "momo"),
+    createdAt: now,
+    gentleMode: consent.subject === "deceased",
+    archived: false,
+  };
+  return { character, assets };
+}
+
 export async function buildCharacterRecord(
   consent: ConsentRecord,
   parsed: ParsedImport,

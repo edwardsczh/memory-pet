@@ -365,6 +365,57 @@
   border-radius: 16px;
 }
 
+.key-gate {
+  z-index: 60;
+  top: 8px;
+  max-height: calc(100% - 16px);
+  background: #f5f3fa;
+  user-select: text;
+}
+
+.key-gate-note,
+.key-gate-hint {
+  margin: 10px 12px 0;
+  color: #3d2f66;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.key-gate-hint {
+  color: #8a4b12;
+}
+
+.key-gate-actions {
+  display: flex;
+  gap: 8px;
+  margin: 8px 12px 0;
+}
+
+.key-gate-actions button {
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #3d6b5a;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.key-gate-actions button:last-child {
+  background: #e8e4de;
+  color: #333;
+}
+
+.key-gate .settings {
+  max-width: none;
+  padding: 8px 8px 16px;
+}
+
+.key-gate .settings-header h1 {
+  font-size: 16px;
+}
+
 .stage .mp-overlay {
   padding: 10px;
   background: transparent;

@@ -1,8 +1,9 @@
 /**
  * Generic CSV (columns time / sender / content, Chinese or English names) and
  * the JSON template `[{ "time": "...", "sender": "...", "text": "..." }]`.
- * Column aliases also cover WeChatExporter's CSV (时间,发送者,类型,内容) and the
- * common WeChatMsg / 留痕 CSV (StrTime, NickName, StrContent, Type, IsSender).
+ * Column aliases also cover WeChatExporter's CSV (时间,发送者,类型,内容), the
+ * common WeChatMsg / 留痕 CSV (StrTime, NickName, StrContent, Type, IsSender),
+ * and PyWxDump-style backup JSON (CreateTime, talker, msg or content.msg, is_sender).
  */
 import type { MessageKind, ParsedImport } from "../../model";
 import {
@@ -36,8 +37,15 @@ const ALIASES: Record<Field, string[]> = {
   // NickName before Sender: 留痕 CSV puts the wxid in "Sender".
   sender: [
     "nickname",
+    "talkername",
+    "talker_name",
+    "sendername",
     "sender_name",
+    "display_name",
+    "displayname",
+    "sender_username",
     "sender",
+    "talker",
     "from",
     "name",
     "author",
@@ -63,7 +71,7 @@ const ALIASES: Record<Field, string[]> = {
     "文本",
     "聊天内容",
   ],
-  type: ["type", "kind", "typename", "msg_type", "类型", "消息类型"],
+  type: ["type", "kind", "typename", "type_name", "msg_type", "类型", "消息类型"],
   self: ["is_self", "isself", "issender", "is_sender", "from_me", "是否自己", "是否我发送"],
 };
 
@@ -139,11 +147,25 @@ function isTruthy(v: string): boolean {
   return /^(1|true|yes|是|y)$/i.test(v.trim());
 }
 
+/** Backup exports sometimes nest the text as `{ msg, src }` instead of a string. */
+function fieldText(v: unknown): string {
+  const direct = asString(v);
+  if (direct) return direct;
+  if (!isRecord(v)) return "";
+  for (const key of ["msg", "text", "content", "message", "strContent", "StrContent"]) {
+    if (key in v) {
+      const inner = asString(v[key]);
+      if (inner) return inner;
+    }
+  }
+  return "";
+}
+
 function toRows(records: Record<string, unknown>[], map: ColumnMap, opts: ParseOptions) {
   let selfSender: string | undefined;
   const rows: RawMessage[] = records.map((r) => {
     const sender = asString(r[map.sender!]);
-    const text = asString(r[map.text!]);
+    const text = fieldText(r[map.text!]);
     if (map.self && !selfSender && isTruthy(asString(r[map.self]))) selfSender = sender;
     return {
       ts: parseTimestamp(r[map.time!], opts.tzOffsetMinutes) ?? NaN,
@@ -157,25 +179,105 @@ function toRows(records: Record<string, unknown>[], map: ColumnMap, opts: ParseO
 
 // ---------- JSON ----------
 
+const LIST_KEYS = [
+  "messages",
+  "items",
+  "data",
+  "records",
+  "msgs",
+  "list",
+  "msg_list",
+  "message_list",
+  "rows",
+];
+
+/** Keys from the first rows, so a field that appears after the first message still counts. */
+function columnKeys(records: Record<string, unknown>[]): string[] {
+  const keys: string[] = [];
+  const seen = new Set<string>();
+  for (const record of records.slice(0, 40)) {
+    for (const key of Object.keys(record)) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      keys.push(key);
+    }
+  }
+  return keys;
+}
+
+function usable(records: Record<string, unknown>[]): boolean {
+  return records.length > 0 && hasCore(mapColumns(columnKeys(records)));
+}
+
+interface FoundList {
+  records: Record<string, unknown>[];
+  warning?: string;
+}
+
+function findMessageList(root: unknown): FoundList | null {
+  if (Array.isArray(root)) {
+    const records = root.filter(isRecord);
+    return usable(records) ? { records } : null;
+  }
+  if (!isRecord(root)) return null;
+  for (const key of LIST_KEYS) {
+    if (!Array.isArray(root[key])) continue;
+    const records = root[key].filter(isRecord);
+    if (usable(records)) return { records };
+  }
+  const groups: { key: string; records: Record<string, unknown>[] }[] = [];
+  for (const [key, value] of Object.entries(root)) {
+    if (!Array.isArray(value)) continue;
+    const records = value.filter(isRecord);
+    if (usable(records)) groups.push({ key, records });
+  }
+  if (!groups.length) return null;
+  groups.sort((a, b) => b.records.length - a.records.length);
+  const best = groups[0];
+  return {
+    records: best.records,
+    warning:
+      groups.length > 1
+        ? `文件包含 ${groups.length} 个会话，已导入消息最多的「${best.key}」。其他会话请分开导出后再导入`
+        : undefined,
+  };
+}
+
 export function genericJsonRecords(root: unknown): Record<string, unknown>[] | null {
-  const list = Array.isArray(root)
-    ? root
-    : isRecord(root)
-      ? [root.messages, root.items, root.data, root.records].find(Array.isArray)
-      : null;
-  if (!list) return null;
-  const records = list.filter(isRecord);
-  if (!records.length) return null;
-  return hasCore(mapColumns(Object.keys(records[0]))) ? records : null;
+  return findMessageList(root)?.records ?? null;
+}
+
+/** One JSON object per line (JSONL), used by some backup dumps. */
+export function genericJsonLineRecords(content: string): Record<string, unknown>[] | null {
+  const lines = content
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (lines.length < 2 || !lines[0].startsWith("{")) return null;
+  const records: Record<string, unknown>[] = [];
+  for (const line of lines) {
+    if (!line.startsWith("{")) return null;
+    try {
+      const value = JSON.parse(line) as unknown;
+      if (!isRecord(value)) return null;
+      records.push(value);
+    } catch {
+      return null;
+    }
+  }
+  return usable(records) ? records : null;
 }
 
 export function parseGenericJson(root: unknown, opts: ParseOptions): ParsedImport {
-  const records = genericJsonRecords(root)!;
-  const { rows, selfSender } = toRows(records, mapColumns(Object.keys(records[0])), opts);
-  const title = isRecord(root)
-    ? asString(root.title ?? root.chat ?? root.name) || undefined
-    : undefined;
-  return buildImport("generic-json", rows, { title, selfSender });
+  const found = findMessageList(root);
+  if (!found) throw new ImportFormatError("文件里没有识别到任何消息");
+  const { rows, selfSender } = toRows(found.records, mapColumns(columnKeys(found.records)), opts);
+  const named = isRecord(root) ? asString(root.title ?? root.chat ?? root.name) : "";
+  return buildImport("generic-json", rows, {
+    title: named || undefined,
+    selfSender,
+    warnings: found.warning ? [found.warning] : [],
+  });
 }
 
 // ---------- CSV ----------
